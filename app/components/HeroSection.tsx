@@ -1,13 +1,11 @@
 // components/Hero.tsx
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 
-interface HeroProps {}
-
-const Hero: React.FC<HeroProps> = () => {
+export default function Hero() {
   const slides = [
     {
       id: 1,
@@ -33,7 +31,6 @@ const Hero: React.FC<HeroProps> = () => {
   ];
 
   const [currentIndex, setCurrentIndex] = useState(0);
-  const sliderRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -138,5 +135,3 @@ const Hero: React.FC<HeroProps> = () => {
     </div>
   );
 };
-
-export default Hero;

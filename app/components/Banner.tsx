@@ -2,9 +2,7 @@
 import React from 'react';
 import Image from 'next/image';
 
-interface BannerProps {}
-
-const Banner: React.FC<BannerProps> = () => {
+export default function Banner() {
   return (
     <div className="relative w-full"> {/* Make it take full width */}
       <Image
@@ -21,5 +19,3 @@ const Banner: React.FC<BannerProps> = () => {
     </div>
   );
 };
-
-export default Banner;

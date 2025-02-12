@@ -5,10 +5,9 @@ import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBars, faSearch, faShoppingCart } from '@fortawesome/free-solid-svg-icons';
 import PyiursLogo from './ui/PyiursLogo';
+import Link from 'next/link';
 
-interface HeaderProps {}
-
-const Header: React.FC<HeaderProps> = () => {
+export default function Header(){
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const toggleDrawer = () => {
@@ -55,20 +54,18 @@ const Header: React.FC<HeaderProps> = () => {
             <FontAwesomeIcon icon={faBars} className="h-6 w-6" />
           </button>
           <nav className="mt-4"> {/* Margin Top for the nav*/}
-            <a href="/" className="block py-2 hover:text-gray-500"> {/* Py for menu item spacing*/}
+            <Link href="/" className="block py-2 hover:text-gray-500"> {/* Py for menu item spacing*/}
               Home
-            </a>
-            <a href="/shop" className="block py-2 hover:text-gray-500">
+            </Link>
+            <Link href="/shop" className="block py-2 hover:text-gray-500">
               Shop
-            </a>
-            <a href="/about" className="block py-2 hover:text-gray-500">
+            </Link>
+            <Link href="/about" className="block py-2 hover:text-gray-500">
               About
-            </a>
+            </Link>
           </nav>
         </div>
       </div>
     </header>
   );
 };
-
-export default Header;

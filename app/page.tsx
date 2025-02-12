@@ -2,9 +2,7 @@ import Banner from './components/Banner';
 import Header from './components/Header';
 import Hero from './components/HeroSection';
 
-interface HomePageProps {}
-
-const HomePage: React.FC<HomePageProps> = () => {
+export default function HomePage() {
 
   return (
   <div className="relative min-h-screen">
@@ -16,5 +14,3 @@ const HomePage: React.FC<HomePageProps> = () => {
   </div>
   );
 };
-
-export default HomePage;
