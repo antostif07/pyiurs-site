@@ -10,7 +10,7 @@ export default function HomePage() {
       <Header />
     </div>
     <Hero />
-    <Banner />
+    {/* <Banner /> */}
   </div>
   );
 };
