@@ -3,6 +3,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
 
 interface HeroProps {}
 
@@ -32,20 +33,15 @@ const Hero: React.FC<HeroProps> = () => {
   ];
 
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [hasMounted, setHasMounted] = useState(false); // New state to track mounting
+  const sliderRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setHasMounted(true); // Set to true once the component has mounted
     const intervalId = setInterval(() => {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % slides.length);
     }, 7000);
 
     return () => clearInterval(intervalId);
   }, [slides.length]);
-
-  const transitionDuration = 20; // Durée de l'animation de zoom
-  const slideDuration = 7; // Durée d'affichage de chaque slide
-  const delayBeforeZoom = slideDuration - (transitionDuration % slideDuration);
 
   const variants = {
     enter: (direction: number) => {
@@ -81,7 +77,7 @@ const Hero: React.FC<HeroProps> = () => {
   };
 
   return (
-    <div className="relative h-screen min-h-[500px] overflow-hidden">
+    <div className="relative h-screen min-h-screen overflow-hidden">
       <AnimatePresence initial={false} custom={1} >
         <motion.div
           key={slides[currentIndex].id}
@@ -99,20 +95,23 @@ const Hero: React.FC<HeroProps> = () => {
           }}
           custom={1}
         >
-          <motion.img
-            src={slides[currentIndex].imageUrl}
-            alt={`Hero Image ${slides[currentIndex].id}`}
-            className="object-cover w-full h-full object-top z-1"
-            style={{ scale: 1.1 }}
-            transition={{
-              duration: transitionDuration,
+          <motion.div style={{width:"100%", height:"100%", position:"absolute", scale: 1.1}} transition={{
+              duration: 20,
               repeat: Infinity,
               repeatType: 'reverse',
               ease: 'linear',
-               delay: delayBeforeZoom,
-            }}
-            animate={hasMounted ? { scale: 1.5 } : {scale:1.1}} // Start zoom on mount
-          />
+            }} animate={{ scale: 1.5 }}>
+              <Image
+                  src={slides[currentIndex].imageUrl}
+                  alt={`Hero Image ${slides[currentIndex].id}`}
+                  fill
+                  style={{
+                      objectFit: 'cover',
+                      objectPosition: 'top',
+                  }}
+                  priority // loading priority
+                  />
+          </motion.div>
 
           {/* Dark Overlay */}
           <div className="absolute top-0 left-0 w-full h-full bg-black opacity-50 z-10"></div>

@@ -1,3 +1,4 @@
+import Banner from './components/Banner';
 import Header from './components/Header';
 import Hero from './components/HeroSection';
 
@@ -11,6 +12,7 @@ const HomePage: React.FC<HomePageProps> = () => {
       <Header />
     </div>
     <Hero />
+    <Banner />
   </div>
   );
 };
