@@ -1,4 +1,3 @@
-// components/Hero.tsx
 'use client';
 
 import React, { useState, useEffect, } from 'react';
@@ -115,17 +114,17 @@ export default function Hero() {
 
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center text-white z-20">
             <motion.h2
-              className="text-4xl md:text-5xl font-bold mb-4 font-hero"
+              className="text-5xl md:text-5xl font-bold mb-4 font-hero"
             >
               {slides[currentIndex].title}
             </motion.h2>
             <motion.p
-              className="text-lg mb-6"
+              className="text-xl mb-6"
             >
               {slides[currentIndex].description}
             </motion.p>
             <motion.button
-              className="bg-white text-black py-2 px-6 rounded-md hover:bg-gray-100"
+              className="bg-white text-black py-3 px-8 rounded-md hover:bg-gray-100 transition"
             >
               {slides[currentIndex].buttonText}
             </motion.button>

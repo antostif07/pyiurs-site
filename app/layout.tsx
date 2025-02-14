@@ -3,6 +3,7 @@ import { Inter, Playfair_Display } from 'next/font/google';
 import './globals.css'; // Make sure this path is correct
 import type { Metadata } from 'next';
 import { ReactNode } from 'react';
+import Footer from './components/Footer';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -26,6 +27,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.className} ${playfair.className} font-serif`}>
         {children}
+        <Footer />
       </body>
     </html>
   );

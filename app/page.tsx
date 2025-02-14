@@ -1,16 +1,18 @@
-import Banner from './components/Banner';
-import Header from './components/Header';
+import SegmentServer from './components/segment.server';
 import Hero from './components/HeroSection';
+import FeaturedProducts from './components/FeaturedProducts';
+import HeaderServer from "@/app/components/header.server";
 
 export default function HomePage() {
-
   return (
   <div className="relative min-h-screen">
     <div className='absolute w-full z-20'>
-      <Header />
+      {/*<Header />*/}
+      <HeaderServer />
     </div>
     <Hero />
-    {/* <Banner /> */}
+    <SegmentServer />
+    <FeaturedProducts />
   </div>
   );
 };
