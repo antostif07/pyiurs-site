@@ -8,6 +8,7 @@ import Link from 'next/link';
 import PageHeroSection from "@/app/components/segments/PageHeroSection";
 import {CartItem} from "@/app/types/types";
 import useCartStore from "@/store/cart";
+import Image from "next/image";
 
 export default function Cart() {
     const [cart, setCart] = useState<CartItem[]>([]);
@@ -51,7 +52,7 @@ export default function Cart() {
                                 <Card key={item.id} className="p-4">
                                     <div className="flex gap-4">
                                         <div className="w-24 h-24 overflow-hidden rounded-md">
-                                            <img
+                                            <Image
                                                 src={`${process.env.NEXT_PUBLIC_STRAPI_API_URL}${item.image.url}`}
                                                 alt={item.name}
                                                 className="w-full h-full object-cover"

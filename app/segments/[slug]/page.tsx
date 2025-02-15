@@ -1,25 +1,25 @@
 import React from 'react';
-import {getProducts, getCategories, getSegment} from '@/lib/api';
-import CategoryFilter from "@/app/components/CategoryFilter";
+import {getProducts, getSegment} from '@/lib/api';
+// import CategoryFilter from "@/app/components/CategoryFilter";
 import ProductGrid from "@/app/components/ProductGrid";
 import PageHeroSection from "@/app/components/segments/PageHeroSection";
 
 interface Props {
     params: Promise<{ slug: string }>,
-    searchParams: Promise<{ category?: string }>;
+    // searchParams: Promise<{ category?: string }>;
 }
 
-export default async function SegmentPage({ params, searchParams }: Props) {
-    const { category } = await searchParams;
+export default async function SegmentPage({ params, }: Props) {
+    // const { category } = await searchParams;
     const { slug } = await params
 
     const segmentPromise = await getSegment(slug)
     const productsPromise = getProducts({segment: slug});
-    const categoriesPromise = getCategories();
+    // const categoriesPromise = getCategories();
 
     const segment = await segmentPromise
     const products = await productsPromise;
-    const categories = await categoriesPromise;
+    // const categories = await categoriesPromise;
 
     // // Envoi des fonctions en useCallback
     // const onCategoryClick = useCallback((slug: string | undefined) => {
@@ -37,8 +37,14 @@ export default async function SegmentPage({ params, searchParams }: Props) {
             <PageHeroSection title={segment?.name || ''} image={`${process.env.NEXT_PUBLIC_STRAPI_API_URL}${segment?.image?.formats.medium?.url}`} />
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                    <CategoryFilter categories={categories} selectedCategory={category} />
-                    <ProductGrid products={products} />
+                    {/*<CategoryFilter categories={categories} selectedCategory={category} />*/}
+                    {
+                        products.length > 0 ? (
+                            <ProductGrid products={products} />
+                        ) : (
+                            <div className={'flex col-span-1 md:col-span-4 justify-center font-bold text-3xl py-16'}>Aucun Produit trouvé</div>
+                        )
+                    }
                 </div>
             </div>
         </div>

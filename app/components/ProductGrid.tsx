@@ -5,6 +5,7 @@ import {Button} from "@/components/ui/button";
 import {Card} from "@/components/ui/card";
 import {motion} from "framer-motion";
 import useCartStore from "@/store/cart";
+import Image from 'next/image'
 
 interface ProductGridProps {
     products: Product[];
@@ -39,7 +40,7 @@ export default function ProductGrid({ products }: ProductGridProps) {
                     >
                         <Card className="h-ful overflow-hidden l flex flex-col justify-between"> {/* Make Card take full height and use flex */}
                             <div className="aspect-w-3 aspect-h-4">
-                                <img
+                                <Image
                                     src={`${process.env.NEXT_PUBLIC_STRAPI_API_URL}${product.image.formats.medium?.url}`}
                                     alt={product.name}
                                     className="object-cover w-full h-full transition-transform group-hover:scale-105"

@@ -2,19 +2,22 @@ import {Category, Product, Segment} from "@/app/types/types";
 
 const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_API_URL;
 export async function getProducts({segment} : {segment?: string,}): Promise<Product[]> {
-    const apiUrl = `${STRAPI_URL}/api/segments?populate=*`;
-    const filter = `&filters[slug][$eq]=${segment}`;
+    const apiUrl = `${STRAPI_URL}/api/products?populate=*`;
+    const filter = `&filters[category][segment][slug][$eq]=${segment}`;
 
     const url = segment ? `${apiUrl}${filter}` : apiUrl;
+
+    console.log(url)
 
     const res = await fetch(url, { cache: "no-cache" });
 
     if (!res.ok) {
-        throw new Error(`Failed to fetch articles: ${res.status}`);
+        throw new Error(`Failed to fetch products: ${res.status}`);
     }
 
     const data = await res.json();
 
+    console.log(data)
     if (data) {
         return data.data
     } else {
