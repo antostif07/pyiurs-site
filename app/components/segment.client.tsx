@@ -3,13 +3,19 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { motion, useAnimation } from 'framer-motion';
 import { twMerge } from 'tailwind-merge';
-import Image from "next/image";
-import {Segment} from "@/app/types/types";  // Import tailwind-merge
+import {Segment} from "@/app/types/types";
+import {useInView} from "react-intersection-observer";
+import Link from "next/link";
+import Image from "next/image";  // Import tailwind-merge
 
 export default function SegmentClient({ rayon }: { rayon: Segment }) {
     const segmentRef = useRef<HTMLDivElement>(null);
     const controls = useAnimation();
     const [isVisible, setIsVisible] = useState(false);
+    const { ref, inView } = useInView({
+        triggerOnce: true,
+        threshold: 0.2,
+    });
 
     useEffect(() => {
         const seg = segmentRef.current
@@ -58,21 +64,24 @@ export default function SegmentClient({ rayon }: { rayon: Segment }) {
     );
 
     return (
-        <motion.div
-            ref={segmentRef}
-            className={mergedClassName}
-            variants={variants}
-            initial="hidden"
-            animate={controls}
-        >
-            <Image
-                src={imageUrl ? `${process.env.NEXT_PUBLIC_STRAPI_API_URL}${imageUrl}` : '/placeholder-image.jpg'}
-                alt={imageName}
-                className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent flex items-end justify-center p-4">
-                <h3 className="text-white text-xl md:text-2xl font-semibold text-center">{imageName}</h3>
-            </div>
-        </motion.div>
+        <Link href={`/segments/${rayon.slug}`} passHref> {/* Use Link with the desired href */}
+            <motion.div
+                ref={ref}
+                className={mergedClassName}
+                variants={variants}
+                initial="hidden"
+                animate={inView ? "visible" : "hidden"}
+            >
+                <Image
+                    src={imageUrl ? `${process.env.NEXT_PUBLIC_STRAPI_API_URL}${imageUrl}` : '/placeholder-image.jpg'}
+                    alt={imageName}
+                    width={rayon.image?.width} height={rayon.image?.height}
+                    className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent flex items-end justify-center p-4">
+                    <h3 className="text-white text-xl md:text-2xl font-semibold text-center">{imageName}</h3>
+                </div>
+            </motion.div>
+        </Link>
     );
 }

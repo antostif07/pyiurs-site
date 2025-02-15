@@ -1,6 +1,5 @@
 import React from 'react';
 import {ApiResponse, Product} from "@/app/types/types";
-import Image from 'next/image'
 
 const FeaturedProducts = async () => {
   const apiUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL;
@@ -9,11 +8,11 @@ const FeaturedProducts = async () => {
     cache: 'no-store'
   });
 
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
+  // if (!response.ok) {
+  //   throw new Error(`HTTP error! status: ${response.status}`);
+  // }
 
-  const json: ApiResponse = await response.json();
+  const json: ApiResponse<Product> = await response.json();
 
   if (json.error) {
     return <div>{`Erreur Interne. Contactez l'Administrateur.`}</div>;
@@ -33,7 +32,7 @@ const FeaturedProducts = async () => {
                   className="group cursor-pointer rounded-lg shadow-md overflow-hidden transform hover:scale-105 transition-transform duration-300 animate-slide-up"
               >
                 <div className="relative h-[400px] overflow-hidden">
-                  <Image
+                  <img
                       src={`${apiUrl}${product.image.formats.medium?.url}`}
                       alt={product.name}
                       className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500 ease-in-out"

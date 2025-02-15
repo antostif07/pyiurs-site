@@ -98,8 +98,8 @@ interface Pagination {
     total: number;
 }
 
-interface ApiResponse {
-    data: Product[];
+interface ApiResponse<T> {
+    data: T[];
     meta: {
         pagination: Pagination;
     };
@@ -115,5 +115,35 @@ interface Segment {
     documentId: string;
     createdAt: string;
     image?: Image;
+    slug: string;
 }
-export type { ImageFormats, Image, Product, Pagination, ApiResponse, ProductVariant, Segment };
+
+interface Category {
+    id: number;
+    name: string;
+    segment: Segment;
+    documentId: string;
+    slug: string;
+    createdAt: string;
+    cover?: Image;
+}
+
+interface CartItem {
+    id: string;
+    name: string;
+    price: number;
+    quantity: number;
+    image: { url: string };
+}
+
+interface CartState {
+    cartItems: CartItem[];
+    addToCart: (item: CartItem) => void;
+    removeFromCart: (itemId: string) => void;
+    updateQuantity: (itemId: string, quantity: number) => void;
+    clearCart: () => void;
+    totalItems: number;
+    totalPrice: number;
+}
+
+export type { ImageFormats, Image, Product, Pagination, ApiResponse, ProductVariant, Segment, Category, CartState, CartItem};

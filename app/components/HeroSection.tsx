@@ -3,6 +3,7 @@
 import React, { useState, useEffect, } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
+import Link from 'next/link'
 
 export default function Hero() {
   const slides = [
@@ -126,7 +127,9 @@ export default function Hero() {
             <motion.button
               className="bg-white text-black py-3 px-8 rounded-md hover:bg-gray-100 transition"
             >
-              {slides[currentIndex].buttonText}
+              <Link href={'/segments/femme'}>
+                {slides[currentIndex].buttonText}
+              </Link>
             </motion.button>
           </div>
         </motion.div>

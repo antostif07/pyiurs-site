@@ -1,38 +1,46 @@
-import {Category, Product} from "@/app/types/types";
-import {useCallback} from "react";
-import {getCategories, getProducts} from "@/lib/api";
+import React from 'react';
+import {getProducts, getCategories, getSegment} from '@/lib/api';
+import CategoryFilter from "@/app/components/CategoryFilter";
+import ProductGrid from "@/app/components/ProductGrid";
+import PageHeroSection from "@/app/components/segments/PageHeroSection";
 
 interface Props {
-    searchParams: { category?: string };
+    params: Promise<{ slug: string }>,
+    searchParams: Promise<{ category?: string }>;
 }
 
-export default async function SegmentDetails({ searchParams }: Props) {
-    const { category } = searchParams
+export default async function SegmentPage({ params, searchParams }: Props) {
+    const { category } = await searchParams;
+    const { slug } = await params
 
-    const articlesPromise = getProducts(category);
+    const segmentPromise = await getSegment(slug)
+    const productsPromise = getProducts({segment: slug});
     const categoriesPromise = getCategories();
 
-    const articles = await articlesPromise;
+    const segment = await segmentPromise
+    const products = await productsPromise;
     const categories = await categoriesPromise;
 
-    // Envoi des fonctions en useCallback
-    const onCategoryClick = useCallback((slug: string | undefined) => {
-        const params = new URLSearchParams(searchParams);
-        if (slug) {
-            params.set('category', slug);
-        } else {
-            params.delete('category');
-        }
-        window.location.search = params.toString();
-    }, [searchParams]);
+    // // Envoi des fonctions en useCallback
+    // const onCategoryClick = useCallback((slug: string | undefined) => {
+    //     const params = new URLSearchParams(searchParams);
+    //     if (slug) {
+    //         params.set('category', slug);
+    //     } else {
+    //         params.delete('category');
+    //     }
+    //     window.location.search = params.toString();
+    // }, [searchParams]);
 
     return (
-        <div className="container mx-auto py-8">
-            <h1 className="text-2xl font-bold mb-4">Collection Femme</h1>
-
-            {/*<CategoryFilter categories={categories} selectedCategory={category} onCategoryClick={onCategoryClick} />*/}
-
-            {/*<ArticleGrid articles={articles} />*/}
+        <div className="mx-auto">
+            <PageHeroSection title={segment?.name || ''} image={`${process.env.NEXT_PUBLIC_STRAPI_API_URL}${segment?.image?.formats.medium?.url}`} />
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    <CategoryFilter categories={categories} selectedCategory={category} />
+                    <ProductGrid products={products} />
+                </div>
+            </div>
         </div>
     );
 }

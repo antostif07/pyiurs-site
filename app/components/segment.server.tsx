@@ -12,7 +12,7 @@ export default async function SegmentsServer() {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const json: ApiResponse = await response.json();
+        const json: ApiResponse<Segment> = await response.json();
 
         if (json.error) {
             console.error("Erreur de l'API:", json.error);

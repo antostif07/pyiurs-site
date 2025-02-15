@@ -1,11 +1,11 @@
-// app/components/HeaderClient.tsx
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Menu, Search, ShoppingBag, ChevronDown, ChevronUp } from 'lucide-react';
+import { Menu, Search, ShoppingBag, } from 'lucide-react';
 import PyiursLogo from './ui/PyiursLogo';
 import Link from 'next/link';
 import {Segment} from "@/app/types/types";
+import useCartStore from "@/store/cart";
 
 interface ClientHeaderProps {
     segments: Segment[];
@@ -13,16 +13,17 @@ interface ClientHeaderProps {
 
 export default function HeaderClient({ segments }: ClientHeaderProps) {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-    const [openSegment, setOpenSegment] = useState<number | null>(null);
+    // const [openSegment, setOpenSegment] = useState<number | null>(null);
     const drawerRef = useRef<HTMLDivElement>(null);
+    const {cartItems} = useCartStore();
 
     const toggleDrawer = () => {
         setIsDrawerOpen(!isDrawerOpen);
     };
 
-    const toggleSegment = (segmentId: number) => {
-        setOpenSegment(openSegment === segmentId ? null : segmentId);
-    };
+    // const toggleSegment = (segmentId: number) => {
+    //     setOpenSegment(openSegment === segmentId ? null : segmentId);
+    // };
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -65,7 +66,7 @@ export default function HeaderClient({ segments }: ClientHeaderProps) {
                         <Link href="/cart" className="text-white hover:text-gray-500 focus:outline-none relative">
                             <ShoppingBag className="h-5 w-5" color="white" />
                             <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full text-xs px-1 leading-none">
-                                3
+                                {cartItems.length}
                             </span>
                         </Link>
                     </div>
@@ -83,28 +84,19 @@ export default function HeaderClient({ segments }: ClientHeaderProps) {
                         <Menu className="h-6 w-6" />
                     </button>
                     <nav className="mt-4">
-                        <Link href="/" className="block py-2 hover:text-gray-500">
-                            Home
-                        </Link>
-                        <Link href="/shop" className="block py-2 hover:text-gray-500">
-                            Shop
-                        </Link>
-                        <Link href="/about" className="block py-2 hover:text-gray-500">
-                            About
+                        <Link href="/" className="flex py-2 px-2 hover:text-gray-500">
+                            Accueil
                         </Link>
                         {segments.map((segment) => (
                             <div key={segment.id}>
-                                <button
-                                    className="flex items-center justify-between w-full py-2 hover:text-gray-500"
-                                    onClick={() => toggleSegment(segment.id)}
-                                >
+                                <Link href={`/segments/${segment.slug}`} className="flex py-2 px-2 hover:text-gray-500">
                                     {segment.name}
-                                    {openSegment === segment.id ? (
-                                        <ChevronUp className="h-4 w-4" />
-                                    ) : (
-                                        <ChevronDown className="h-4 w-4" />
-                                    )}
-                                </button>
+                                    {/*{openSegment === segment.id ? (*/}
+                                    {/*    <ChevronUp className="h-4 w-4" />*/}
+                                    {/*) : (*/}
+                                    {/*    <ChevronDown className="h-4 w-4" />*/}
+                                    {/*)}*/}
+                                </Link>
                                 {/*{openSegment === segment.id && (*/}
                                 {/*    <div className="pl-4">*/}
                                 {/*        {segment.categories.map((category) => (*/}
