@@ -2,13 +2,13 @@
 const nextConfig = {
   reactStrictMode: true,
   // @ts-ignore
-  // webpack: (config, { isServer }) => {
-  //   // Forcer Webpack
-  //   if (isServer) {
-  //     config.externals = [...config.externals, 'react-server-dom-webpack'];
-  //   }
-  //   return config;
-  // },
+  webpack: (config, { isServer }) => {
+    // Forcer Webpack
+    if (isServer) {
+      config.externals = [...config.externals, 'react-server-dom-webpack'];
+    }
+    return config;
+  },
   images: {
     remotePatterns: [
       {
