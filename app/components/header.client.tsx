@@ -6,7 +6,6 @@ import PyiursLogo from './ui/PyiursLogo';
 import Link from 'next/link';
 import { Segment, Category } from "@/app/types/types";
 import useCartStore from "@/store/cart";
-import { useRouter } from 'next/navigation';
 
 interface ClientHeaderProps {
     segments: Segment[];
@@ -17,7 +16,6 @@ export default function HeaderClient({ segments }: ClientHeaderProps) {
     const [openSegment, setOpenSegment] = useState<number | null>(null);
     const drawerRef = useRef<HTMLDivElement>(null);
     const { cartItems } = useCartStore();
-    const router = useRouter();
 
     const toggleDrawer = () => {
         setIsDrawerOpen(!isDrawerOpen);
