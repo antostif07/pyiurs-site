@@ -89,6 +89,7 @@ interface Product {
     publishedAt: string;
     image: Image;
     variants: ProductVariant[];
+    slug: string;
 }
 
 interface Pagination {

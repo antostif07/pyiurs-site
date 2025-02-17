@@ -42,7 +42,7 @@ export default function ProductGrid({ products }: ProductGridProps) {
                             <div className="aspect-w-3 aspect-h-4">
                                 <Image
                                     src={`${process.env.NEXT_PUBLIC_STRAPI_API_URL}${product.image.formats.medium?.url}`}
-                                    alt={product.name}
+                                    alt={product.name} width={product.image.width} height={product.image.height}
                                     className="object-cover w-full h-full transition-transform group-hover:scale-105"
                                 />
                             </div>

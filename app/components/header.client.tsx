@@ -1,11 +1,12 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Menu, Search, ShoppingBag, } from 'lucide-react';
+import { Menu, Search, ShoppingBag } from 'lucide-react';
 import PyiursLogo from './ui/PyiursLogo';
 import Link from 'next/link';
-import {Segment} from "@/app/types/types";
+import { Segment } from "@/app/types/types";
 import useCartStore from "@/store/cart";
+import { useRouter } from 'next/navigation'; // Import useRouter
 
 interface ClientHeaderProps {
     segments: Segment[];
@@ -15,29 +16,40 @@ export default function HeaderClient({ segments }: ClientHeaderProps) {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     // const [openSegment, setOpenSegment] = useState<number | null>(null);
     const drawerRef = useRef<HTMLDivElement>(null);
-    const {cartItems} = useCartStore();
+    const { cartItems } = useCartStore();
+    const router = useRouter(); // Initialize useRouter
 
     const toggleDrawer = () => {
         setIsDrawerOpen(!isDrawerOpen);
     };
 
-    // const toggleSegment = (segmentId: number) => {
-    //     setOpenSegment(openSegment === segmentId ? null : segmentId);
-    // };
+    const closeDrawer = () => {
+        setIsDrawerOpen(false);
+    };
+
+    const handleLinkClick = () => {
+        closeDrawer();
+    };
+
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            if (drawerRef.current && !drawerRef.current.contains(event.target as Node)) {
-                setIsDrawerOpen(false);
+            if (drawerRef.current && !drawerRef.current.contains(event.target as Node) && isDrawerOpen) {
+                closeDrawer();
             }
         };
 
         if (isDrawerOpen) {
             document.addEventListener("mousedown", handleClickOutside);
+            document.body.classList.add('overflow-hidden'); // Prevent scrolling when drawer is open
+        } else {
+            document.body.classList.remove('overflow-hidden'); // Allow scrolling when drawer is closed
         }
+
 
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
+            document.body.classList.remove('overflow-hidden');
         };
     }, [isDrawerOpen]);
 
@@ -77,39 +89,21 @@ export default function HeaderClient({ segments }: ClientHeaderProps) {
             <div
                 ref={drawerRef}
                 className={`fixed top-0 left-0 h-full w-64 bg-white shadow-md transform transition-transform duration-300 ease-in-out ${isDrawerOpen ? 'translate-x-0' : '-translate-x-full'
-                }`}
+                    }`}
             >
                 <div className="p-4">
                     <button className="text-gray-700" onClick={toggleDrawer}>
                         <Menu className="h-6 w-6" />
                     </button>
                     <nav className="mt-4">
-                        <Link href="/" className="flex py-2 px-2 hover:text-gray-500">
+                        <Link href="/" className="flex py-2 px-2 hover:text-gray-500" onClick={handleLinkClick}>
                             Accueil
                         </Link>
                         {segments.map((segment) => (
                             <div key={segment.id}>
-                                <Link href={`/segments/${segment.slug}`} className="flex py-2 px-2 hover:text-gray-500">
+                                <Link href={`/segments/${segment.slug}`} className="flex py-2 px-2 hover:text-gray-500" onClick={handleLinkClick}>
                                     {segment.name}
-                                    {/*{openSegment === segment.id ? (*/}
-                                    {/*    <ChevronUp className="h-4 w-4" />*/}
-                                    {/*) : (*/}
-                                    {/*    <ChevronDown className="h-4 w-4" />*/}
-                                    {/*)}*/}
                                 </Link>
-                                {/*{openSegment === segment.id && (*/}
-                                {/*    <div className="pl-4">*/}
-                                {/*        {segment.categories.map((category) => (*/}
-                                {/*            <Link*/}
-                                {/*                key={category.id}*/}
-                                {/*                href={`/category/${category.slug}`}*/}
-                                {/*                className="block py-2 hover:text-gray-500"*/}
-                                {/*            >*/}
-                                {/*                {category.name}*/}
-                                {/*            </Link>*/}
-                                {/*        ))}*/}
-                                {/*    </div>*/}
-                                {/*)}*/}
                             </div>
                         ))}
                     </nav>

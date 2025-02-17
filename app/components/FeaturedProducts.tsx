@@ -1,6 +1,7 @@
 import React from 'react';
 import {ApiResponse, Product} from "@/app/types/types";
 import Image from "next/image";
+import Link from 'next/link';
 
 const FeaturedProducts = async () => {
   const apiUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL;
@@ -35,15 +36,15 @@ const FeaturedProducts = async () => {
                 <div className="relative h-[400px] overflow-hidden">
                   <Image
                       src={`${apiUrl}${product.image.formats.medium?.url}`}
-                      alt={product.name}
+                      alt={product.name} width={product.image.width} height={product.image.height}
                       className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500 ease-in-out"
                   />
                   <div
                       className="absolute inset-0 bg-black opacity-0 group-hover:opacity-30 transition-opacity duration-300"></div>
-                  <button
+                  <Link href={`/products/${product.slug}`} passHref
                       className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white text-gray-800 font-semibold px-6 py-3 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-gray-100">
                     Voir Plus
-                  </button>
+                  </Link>
                 </div>
                 <div className="p-4 text-center">
                   <h3 className="text-xl font-semibold text-gray-800">{product.name}</h3>
