@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Menu, Search, ShoppingBag } from 'lucide-react';
+import { Menu, Search, ShoppingBag, ChevronDown, ChevronUp } from 'lucide-react';
 import PyiursLogo from './ui/PyiursLogo';
 import Link from 'next/link';
-import { Segment } from "@/app/types/types";
+import { Segment, Category } from "@/app/types/types";
 import useCartStore from "@/store/cart";
-import { useRouter } from 'next/navigation'; // Import useRouter
+import { useRouter } from 'next/navigation';
 
 interface ClientHeaderProps {
     segments: Segment[];
@@ -14,10 +14,10 @@ interface ClientHeaderProps {
 
 export default function HeaderClient({ segments }: ClientHeaderProps) {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-    // const [openSegment, setOpenSegment] = useState<number | null>(null);
+    const [openSegment, setOpenSegment] = useState<number | null>(null);
     const drawerRef = useRef<HTMLDivElement>(null);
     const { cartItems } = useCartStore();
-    const router = useRouter(); // Initialize useRouter
+    const router = useRouter();
 
     const toggleDrawer = () => {
         setIsDrawerOpen(!isDrawerOpen);
@@ -31,6 +31,11 @@ export default function HeaderClient({ segments }: ClientHeaderProps) {
         closeDrawer();
     };
 
+    const toggleSegment = (segmentId: number) => {
+        console.log(segmentId);
+        setOpenSegment(openSegment === segmentId ? null : segmentId);
+    };
+
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -41,9 +46,9 @@ export default function HeaderClient({ segments }: ClientHeaderProps) {
 
         if (isDrawerOpen) {
             document.addEventListener("mousedown", handleClickOutside);
-            document.body.classList.add('overflow-hidden'); // Prevent scrolling when drawer is open
+            document.body.classList.add('overflow-hidden');
         } else {
-            document.body.classList.remove('overflow-hidden'); // Allow scrolling when drawer is closed
+            document.body.classList.remove('overflow-hidden');
         }
 
 
@@ -101,9 +106,31 @@ export default function HeaderClient({ segments }: ClientHeaderProps) {
                         </Link>
                         {segments.map((segment) => (
                             <div key={segment.id}>
-                                <Link href={`/segments/${segment.slug}`} className="flex py-2 px-2 hover:text-gray-500" onClick={handleLinkClick}>
+                                <button
+                                    className="flex items-center justify-between w-full py-2 px-2 hover:text-gray-500"
+                                    onClick={() => toggleSegment(segment.id)}
+                                >
                                     {segment.name}
-                                </Link>
+                                    {openSegment === segment.id ? (
+                                        <ChevronUp className="h-4 w-4" />
+                                    ) : (
+                                        <ChevronDown className="h-4 w-4" />
+                                    )}
+                                </button>
+                                {openSegment === segment.id && (
+                                    <div className="pl-4">
+                                    {segment.categories.map((category: Category) => (
+                                        <Link
+                                            key={category.id}
+                                            href={`/categories/${category.slug}`}
+                                            className="block py-2 hover:text-gray-500"
+                                            onClick={handleLinkClick}
+                                        >
+                                            {category.name}
+                                        </Link>
+                                    ))}
+                                </div>
+                                )}
                             </div>
                         ))}
                     </nav>

@@ -9,7 +9,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/Select';
+} from '@/components/ui/select';
 import { Heart, Share2, ShoppingCart, Star, Truck } from 'lucide-react';
 
 // Simuler les données d'un produit

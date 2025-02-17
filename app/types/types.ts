@@ -117,6 +117,7 @@ interface Segment {
     createdAt: string;
     image?: Image;
     slug: string;
+    categories: Category[];
 }
 
 interface Category {

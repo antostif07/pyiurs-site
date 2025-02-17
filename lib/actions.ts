@@ -4,7 +4,7 @@
 import {Segment} from "@/app/types/types";
 
 export async function getSegments(): Promise<Segment[]> {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_STRAPI_API_URL}/api/segments?populate=image`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_STRAPI_API_URL}/api/segments?populate=*`, {
         cache: 'no-store'
     });
 
@@ -21,12 +21,8 @@ export async function getSegments(): Promise<Segment[]> {
                 name: item.name,
                 documentId: item.documentId,
                 slug: item.slug,
-                image: item.image
-                // categories: item.categories.data.map((cat: any) => ({
-                //     id: cat.id,
-                //     name: cat.name,
-                //     slug: cat.slug,
-                // })),
+                image: item.image,
+                categories: item.categories,
             };
         });
     } else {
