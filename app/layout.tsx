@@ -2,7 +2,7 @@
 import { Cormorant_Garamond,
 } from 'next/font/google';
 import './globals.css'; // Make sure this path is correct
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 import HeaderServer from "@/app/components/header.server";
 import Footer from "@/app/components/Footer";
 import dynamic from 'next/dynamic';
@@ -17,25 +17,21 @@ const cormorant = Cormorant_Garamond({
 
 const Menu = dynamic(() => import("../app/components/Menu"))
 
-// export const metadata: Metadata = {
-//   title: 'Pyiurs Boutique',
-//   description: 'Boutique d\'habillement',
-// };
-
 const queryClient = new QueryClient()
 
 export default function RootLayout({ children, }: { children: ReactNode }) {
+  const [open, setOpen] = useState<"isOpen" | "isClosed">("isClosed");
+  
   return (
       <html lang="en">
       <body
           className={`${cormorant.className}`}
       >
         <QueryClientProvider client={queryClient}>
-            <Menu />
-            {/*<div className='absolute w-full z-20'>*/}
-            {/*  <HeaderServer />*/}
-            {/*</div>*/}
+            <Menu open={open} setOpen={setOpen}/>
+            <div className={``}>
             {children}
+            </div>
             <Footer />
         </QueryClientProvider>
       </body>

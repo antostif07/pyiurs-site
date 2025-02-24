@@ -2,8 +2,15 @@ import SegmentServer from './components/segment.server';
 import FeaturedProducts from './components/FeaturedProducts';
 import {Button} from "@/app/components/ui/button";
 import dynamic from "next/dynamic";
+import { Metadata } from 'next/types';
 
 const Hero = dynamic(() => import('./components/HeroSection'))
+
+export const metadata: Metadata = {
+  title: 'Pyiurs | Boutique d\'habillement',
+  description: 'Boutique d\'habillement',
+};
+
 export default function HomePage() {
   return (
   <div className="relative min-h-screen">

@@ -148,4 +148,16 @@ interface CartState {
     totalPrice: number;
 }
 
-export type { ImageFormats, Image, Product, Pagination, ApiResponse, ProductVariant, Segment, Category, CartState, CartItem};
+interface SubCategory {
+    id: number;
+    documentId: string;
+    name: string;
+    slug: string;
+    createdAt: string;
+    updatedAt: string;
+    publishedAt: string;
+    category: Category;
+    segments: Segment[];
+}
+
+export type { SubCategory, ImageFormats, Image, Product, Pagination, ApiResponse, ProductVariant, Segment, Category, CartState, CartItem};
