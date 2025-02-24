@@ -1,13 +1,12 @@
 import {Category, Product, Segment} from "@/app/types/types";
 
 const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_API_URL;
+
 export async function getProducts({segment} : {segment?: string,}): Promise<Product[]> {
     const apiUrl = `${STRAPI_URL}/api/products?populate=*`;
-    const filter = `&filters[category][segment][slug][$eq]=${segment}`;
+    const filter = `&filters[segment][slug][$eq]=${segment}`;
 
     const url = segment ? `${apiUrl}${filter}` : apiUrl;
-
-    console.log(url)
 
     const res = await fetch(url, { cache: "no-cache" });
 
@@ -45,8 +44,12 @@ export async function getSegment(slug: string): Promise<Segment|null> {
     }
 }
 
-export async function getCategories(): Promise<Category[]> {
-    const res = await fetch(`${STRAPI_URL}/api/categories`, { next: { revalidate: 60 } });
+export async function getCategories({segment}: {segment?: string}): Promise<Category[]> {
+    const apiUrl = `${STRAPI_URL}/api/categories?populate=*`;
+
+    const filter = segment ? `&filters[segment][slug][$eq]=${segment}` : '';
+
+    const res = await fetch(`${apiUrl}${filter}`, { next: { revalidate: 60 } });
 
     if (!res.ok) {
         throw new Error(`Failed to fetch categories: ${res.status}`);

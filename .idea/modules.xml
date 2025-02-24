@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/pyiurs.iml" filepath="$PROJECT_DIR$/.idea/pyiurs.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../pyiurs-strapi/.idea/pyiurs-strapi.iml" filepath="$PROJECT_DIR$/../pyiurs-strapi/.idea/pyiurs-strapi.iml" />
     </modules>
   </component>
 </project>

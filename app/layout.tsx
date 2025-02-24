@@ -1,35 +1,43 @@
-// app/layout.tsx
-import { Inter,
-    // Playfair_Display
+'use client'
+import { Cormorant_Garamond,
 } from 'next/font/google';
 import './globals.css'; // Make sure this path is correct
-import type { Metadata } from 'next';
 import { ReactNode } from 'react';
-import Footer from './components/Footer';
 import HeaderServer from "@/app/components/header.server";
+import Footer from "@/app/components/Footer";
+import dynamic from 'next/dynamic';
+import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
 
-const inter = Inter({ subsets: ['latin'] });
+const cormorant = Cormorant_Garamond({
+    subsets: ['latin'],
+    weight: ['300', '400', '500', '600', '700'], // Ajoute les poids que tu veux
+    style: ['normal', 'italic'], // Si tu veux l'italique aussi
+    display: 'swap',
+});
 
-// const playfair = Playfair_Display({
-//   subsets: ['latin'],
-//   display: 'swap',
-//   weight: ['400', '700'], // Specify the weights you want
-// });
+const Menu = dynamic(() => import("../app/components/Menu"))
 
-export const metadata: Metadata = {
-  title: 'Pyiurs Boutique',
-  description: 'Boutique d\'habillement',
-};
+// export const metadata: Metadata = {
+//   title: 'Pyiurs Boutique',
+//   description: 'Boutique d\'habillement',
+// };
+
+const queryClient = new QueryClient()
 
 export default function RootLayout({ children, }: { children: ReactNode }) {
   return (
       <html lang="en">
-      <body className={`${inter.className} font-serif`}>
-      <div className='absolute w-full z-20'>
-        <HeaderServer />
-      </div>
-      {children}
-      <Footer />
+      <body
+          className={`${cormorant.className}`}
+      >
+        <QueryClientProvider client={queryClient}>
+            <Menu />
+            {/*<div className='absolute w-full z-20'>*/}
+            {/*  <HeaderServer />*/}
+            {/*</div>*/}
+            {children}
+            <Footer />
+        </QueryClientProvider>
       </body>
       </html>
   );

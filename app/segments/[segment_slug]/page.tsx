@@ -5,21 +5,20 @@ import ProductGrid from "@/app/components/ProductGrid";
 import PageHeroSection from "@/app/components/segments/PageHeroSection";
 
 interface Props {
-    params: Promise<{ slug: string }>,
+    params: Promise<{ segment_slug: string }>,
     // searchParams: Promise<{ category?: string }>;
 }
 
 export default async function SegmentPage({ params, }: Props) {
     // const { category } = await searchParams;
-    const { slug } = await params
+    const { segment_slug } = await params
 
-    const segmentPromise = await getSegment(slug)
-    const productsPromise = getProducts({segment: slug});
+    const segmentPromise = await getSegment(segment_slug)
+    const productsPromise = getProducts({segment: segment_slug});
     // const categoriesPromise = getCategories();
 
     const segment = await segmentPromise
     const products = await productsPromise;
-    // const categories = await categoriesPromise;
 
     // // Envoi des fonctions en useCallback
     // const onCategoryClick = useCallback((slug: string | undefined) => {

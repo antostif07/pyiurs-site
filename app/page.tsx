@@ -1,8 +1,9 @@
 import SegmentServer from './components/segment.server';
-import Hero from './components/HeroSection';
 import FeaturedProducts from './components/FeaturedProducts';
 import {Button} from "@/app/components/ui/button";
+import dynamic from "next/dynamic";
 
+const Hero = dynamic(() => import('./components/HeroSection'))
 export default function HomePage() {
   return (
   <div className="relative min-h-screen">

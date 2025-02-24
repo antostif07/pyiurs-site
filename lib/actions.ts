@@ -2,9 +2,14 @@
 'use server';
 
 import {Segment} from "@/app/types/types";
+import {getFakeSegments} from "@/app/fakeData/data";
 
 export async function getSegments(): Promise<Segment[]> {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_STRAPI_API_URL}/api/segments?populate=image`, {
+    if(process.env.NODE_ENV === "development") {
+        return getFakeSegments();
+    }
+
+    const res = await fetch(`${process.env.NEXT_PUBLIC_STRAPI_API_URL}/api/segments?populate=*`, {
         cache: 'no-store'
     });
 
@@ -21,12 +26,8 @@ export async function getSegments(): Promise<Segment[]> {
                 name: item.name,
                 documentId: item.documentId,
                 slug: item.slug,
-                image: item.image
-                // categories: item.categories.data.map((cat: any) => ({
-                //     id: cat.id,
-                //     name: cat.name,
-                //     slug: cat.slug,
-                // })),
+                image: item.image,
+                categories: item.categories,
             };
         });
     } else {
