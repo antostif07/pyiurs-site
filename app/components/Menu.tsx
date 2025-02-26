@@ -23,7 +23,7 @@ const fetchSubcategories = async ({segmentSlug, categorySlug}: {segmentSlug?: st
     return await getSubCategories({segment: segmentSlug, category: categorySlug})
 }
 
-export default function Menu({open, setOpen}: {open: 'isOpen' | 'isClosed', setOpen: (value: 'isOpen' | 'isClosed') => void}) {
+export default function Menu({open, setOpenAction}: {open: 'isOpen' | 'isClosed', setOpenAction: (value: 'isOpen' | 'isClosed') => void}) {
     const [view, setView] = useState<'segments' | 'categories' | 'sub-categories'>('segments')
     const [selectedSegment, setSelectedSegment] = useState<string | null>(null)
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
@@ -47,7 +47,7 @@ export default function Menu({open, setOpen}: {open: 'isOpen' | 'isClosed', setO
     })
 
     const handleCloseMenu = () => {
-        setOpen('isClosed')
+        setOpenAction('isClosed')
     }
     
 
@@ -79,7 +79,7 @@ export default function Menu({open, setOpen}: {open: 'isOpen' | 'isClosed', setO
                     className={`flex flex-col items-center justify-start h-full py-4 ${open === 'isOpen' ? 'px-4' : ''}`}
                 >
                     <div>
-                        <MenuToggle toggle={() => open === 'isOpen' ? handleCloseMenu() : setOpen('isOpen')} />
+                        <MenuToggle toggle={() => open === 'isOpen' ? handleCloseMenu() : setOpenAction('isOpen')} />
                     </div>
                     <div
                         className={`flex flex-col ${open === 'isOpen' ? '' : 'justify-center'} items-center flex-grow w-full`}

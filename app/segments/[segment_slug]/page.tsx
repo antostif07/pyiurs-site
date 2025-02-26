@@ -35,8 +35,7 @@ export default async function SegmentPage({ params, }: Props) {
         <div className="mx-auto">
             <PageHeroSection title={segment?.name || ''} image={`${process.env.NEXT_PUBLIC_STRAPI_API_URL}${segment?.image?.formats.medium?.url}`} />
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                    {/*<CategoryFilter categories={categories} selectedCategory={category} />*/}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 py-8">
                     {
                         products.length > 0 ? (
                             <ProductGrid products={products} />
