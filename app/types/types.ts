@@ -160,4 +160,18 @@ interface SubCategory {
     segments: Segment[];
 }
 
-export type { SubCategory, ImageFormats, Image, Product, Pagination, ApiResponse, ProductVariant, Segment, Category, CartState, CartItem};
+interface HomeSection {
+    id: number;
+    title: string;
+    subtitle: string;
+    cover: Image;
+    "Button": IButton;
+}
+
+interface IButton {
+    id: string;
+    title: string;
+    href: string;
+}
+
+export type { SubCategory, ImageFormats, Image, Product, Pagination, ApiResponse, ProductVariant, Segment, Category, CartState, CartItem, HomeSection, IButton };

@@ -1,7 +1,36 @@
 import { getFakeCategories, getFakeSegments } from "@/app/fakeData/data";
-import {Category, Product, Segment, SubCategory} from "@/app/types/types";
+import {Category, HomeSection, Product, Segment, SubCategory} from "@/app/types/types";
 
 const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_API_URL;
+
+
+export async function getHeroSection(): Promise<HomeSection[]> {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_STRAPI_API_URL}/api/home-section?populate[HomeSections][populate]=cover&populate[HomeSections][populate]=Button`, {
+        cache: 'no-store'
+    });
+
+    if (!res.ok) {
+        throw new Error(`Failed to fetch segments: ${res.status}`);
+    }
+
+    const data = await res.json();
+
+    if (data && data.data) {
+        return data.data.map((item: Segment) => {
+            return {
+                id: item.id,
+                name: item.name,
+                documentId: item.documentId,
+                slug: item.slug,
+                image: item.image,
+                categories: item.categories,
+            };
+        });
+    } else {
+        console.error("Invalid segments data structure:", data);
+        return [];
+    }
+}
 
 export async function getSegments(): Promise<Segment[]> {
     // if(process.env.NODE_ENV === "development") {
