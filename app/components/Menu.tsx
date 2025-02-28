@@ -1,15 +1,14 @@
 'use client';
 
 import {useState, useEffect, useRef} from 'react';
-import {ArrowLeft, Search, ShoppingBag, SkipBack} from 'lucide-react';
+import {ArrowLeft, Search, ShoppingBag,} from 'lucide-react';
 import {motion, Variants} from 'framer-motion';
 import {Category, Segment, SubCategory} from "@/app/types/types";
 import {useQuery} from '@tanstack/react-query'
 import { Skeleton } from '@/components/ui/skeleton';
 import { getSegments, getCategories, getSubCategories } from '@/lib/api';
 import Link from 'next/link';
-
-const DURATION = 0.5
+import {asideVariants, DURATION} from "@/lib/utils";
 
 const fetchSegments = async () => {
     return await getSegments()
@@ -82,135 +81,137 @@ export default function Menu({open, setOpenAction}: {open: 'isOpen' | 'isClosed'
                         <MenuToggle toggle={() => open === 'isOpen' ? handleCloseMenu() : setOpenAction('isOpen')} />
                     </div>
                     <div
-                        className={`flex flex-col ${open === 'isOpen' ? '' : 'justify-center'} items-center flex-grow w-full`}
+                        className={`flex flex-col justify-center items-center flex-grow w-full`}
                     >
                         <motion.button
-                            className="p-2 text-gray-600 hover:text-gray-800"
+                            className={`p-2 text-gray-600 hover:text-gray-800 ${open === 'isOpen' ? 'hidden' : ''}`}
                             variants={itemVariantsOpen}
                         >
                             <Search className="w-6 h-6" />
                         </motion.button>
                         <motion.button
-                            className="p-2 text-gray-600 hover:text-gray-800"
+                            className={`p-2 text-gray-600 hover:text-gray-800 ${open === 'isOpen' ? 'hidden' : ''}`}
                             variants={itemVariantsOpen}
                         >
                             <ShoppingBag className="w-6 h-6" />
                         </motion.button>
-                        {view !== 'segments' && (
-                            <div className='flex w-full'>
-                                <button
-                                    onClick={() => setView(view === 'sub-categories' ? 'categories' : 'segments')}
-                                    className="mb-2 text-sm"
-                                >
-                                    <ArrowLeft />
-                                </button>
-                            </div>
-                        )}
-                        {view === 'segments' && (
-                            <>
-                                {loadingSegments ? (
-                                <ul className='w-full'>
-                                    {Array.from({ length: 5 }).map((_, index) => (
-                                    <motion.li key={index} className="p-2" variants={itemVariantsClosed}>
-                                        <Skeleton className="h-4 w-full" />
-                                    </motion.li>
-                                    ))}
-                                </ul>
-                                ) : (
-                                <ul>
-                                    <motion.li
-                                        variants={itemVariantsClosed}
+                        <div className={`h-full flex justify-center flex-col ${open === "isClosed" ? 'hidden' : ''}`}>
+                            {view !== 'segments' && (
+                                <div className='flex w-full'>
+                                    <button
+                                        onClick={() => setView(view === 'sub-categories' ? 'categories' : 'segments')}
+                                        className="mb-2 text-sm"
                                     >
-                                        <Link 
-                                            href="/" onClick={() => handleCloseMenu()}
-                                            className="flex py-2 px-2 hover:text-gray-500 uppercase text-2xl hover:underline">
-                                            Accueil
-                                        </Link>
-                                    </motion.li>
-                                    <motion.li variants={itemVariantsClosed}>
-                                        <Link 
-                                            href="/collections" onClick={() => handleCloseMenu()}
-                                            className="flex py-2 px-2 hover:text-gray-500 uppercase text-2xl hover:underline"
-                                        >
-                                            Collections
-                                        </Link>
-                                    </motion.li>
-                                    {segments?.map((segment) => (
-                                    <motion.li
-                                        key={segment.id}
-                                        onClick={() => {
-                                        setSelectedSegment(segment.slug)
-                                        setView('categories')
-                                        }}
-                                        className="cursor-pointer flex py-2 px-2 hover:text-gray-500 uppercase text-2xl hover:underline"
-                                        variants={itemVariantsClosed}
-                                    >
-                                        {segment.name}
-                                    </motion.li>
-                                    ))}
-                                </ul>
-                                )}
-                            </>
-                        )}
-                        {view === 'categories' && selectedSegment && (
-                            <>
-                                {loadingCategories ? (
-                                <ul>
-                                    {Array.from({ length: 5 }).map((_, index) => (
-                                    <li key={index} className="p-2">
-                                        <Skeleton className="h-4 w-full" />
-                                    </li>
-                                    ))}
-                                </ul>
-                                ) : (
-                                <ul>
-                                    {categories?.map((category) => (
-                                    <motion.li
-                                        key={category.id}
-                                        onClick={() => {
-                                        setSelectedCategory(category.slug)
-                                        setView('sub-categories')
-                                        }}
-                                        className="cursor-pointer flex py-2 px-2 hover:text-gray-500 uppercase text-2xl hover:underline"
-                                        variants={itemVariantsClosed}
-                                    >
-                                        {category.name}
-                                    </motion.li>
-                                    ))}
-                                </ul>
-                                )}
-                            </>
-                        )}
-                        {view === 'sub-categories' && selectedCategory && (
-                            <>
-                                {loadingSubcategories ? (
-                                <ul>
-                                    {Array.from({ length: 5 }).map((_, index) => (
-                                    <motion.li key={index} className="p-2">
-                                        <Skeleton className="h-4 w-full" />
-                                    </motion.li>
-                                    ))}
-                                </ul>
-                                ) : (
-                                <ul>
-                                    {subcategories?.map((subcategory) => (
-                                    <motion.li
-                                        key={subcategory.id}
-                                        className="cursor-pointer flex py-2 px-2 hover:text-gray-500 uppercase text-2xl hover:underline"
-                                        variants={itemVariantsClosed}
-                                        onClick={() => handleCloseMenu()}
-                                    >
-                                        <Link
-                                            href={`/${selectedSegment}/${selectedCategory}/${subcategory.slug}`}
-                                        >
-                                            {subcategory.name}
-                                        </Link>
-                                    </motion.li>
-                                    ))}
-                                </ul>
-                                )}
-                            </>
+                                        <ArrowLeft />
+                                    </button>
+                                </div>
                             )}
+                            {view === 'segments' && open === 'isOpen' && (
+                                <>
+                                    {loadingSegments ? (
+                                        <ul className='w-full'>
+                                            {Array.from({ length: 5 }).map((_, index) => (
+                                                <motion.li key={index} className="p-2" variants={itemVariantsClosed}>
+                                                    <Skeleton className="h-4 w-full" />
+                                                </motion.li>
+                                            ))}
+                                        </ul>
+                                    ) : (
+                                        <ul>
+                                            <motion.li
+                                                variants={itemVariantsClosed}
+                                            >
+                                                <Link
+                                                    href="/" onClick={() => handleCloseMenu()}
+                                                    className="flex py-2 px-2 hover:text-gray-500 uppercase text-2xl hover:underline">
+                                                    Accueil
+                                                </Link>
+                                            </motion.li>
+                                            <motion.li variants={itemVariantsClosed}>
+                                                <Link
+                                                    href="/collections" onClick={() => handleCloseMenu()}
+                                                    className="flex py-2 px-2 hover:text-gray-500 uppercase text-2xl hover:underline"
+                                                >
+                                                    Collections
+                                                </Link>
+                                            </motion.li>
+                                            {segments?.map((segment) => (
+                                                <motion.li
+                                                    key={segment.id}
+                                                    onClick={() => {
+                                                        setSelectedSegment(segment.slug)
+                                                        setView('categories')
+                                                    }}
+                                                    className="cursor-pointer flex py-2 px-2 hover:text-gray-500 uppercase text-2xl hover:underline"
+                                                    variants={itemVariantsClosed}
+                                                >
+                                                    {segment.name}
+                                                </motion.li>
+                                            ))}
+                                        </ul>
+                                    )}
+                                </>
+                            )}
+                            {view === 'categories' && selectedSegment && (
+                                <>
+                                    {loadingCategories ? (
+                                        <ul>
+                                            {Array.from({ length: 5 }).map((_, index) => (
+                                                <li key={index} className="p-2">
+                                                    <Skeleton className="h-4 w-full" />
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    ) : (
+                                        <ul>
+                                            {categories?.map((category) => (
+                                                <motion.li
+                                                    key={category.id}
+                                                    onClick={() => {
+                                                        setSelectedCategory(category.slug)
+                                                        setView('sub-categories')
+                                                    }}
+                                                    className="cursor-pointer flex py-2 px-2 hover:text-gray-500 uppercase text-2xl hover:underline"
+                                                    variants={itemVariantsClosed}
+                                                >
+                                                    {category.name}
+                                                </motion.li>
+                                            ))}
+                                        </ul>
+                                    )}
+                                </>
+                            )}
+                            {view === 'sub-categories' && selectedCategory && (
+                                <>
+                                    {loadingSubcategories ? (
+                                        <ul>
+                                            {Array.from({ length: 5 }).map((_, index) => (
+                                                <motion.li key={index} className="p-2">
+                                                    <Skeleton className="h-4 w-full" />
+                                                </motion.li>
+                                            ))}
+                                        </ul>
+                                    ) : (
+                                        <ul>
+                                            {subcategories?.map((subcategory) => (
+                                                <motion.li
+                                                    key={subcategory.id}
+                                                    className="cursor-pointer flex py-2 px-2 hover:text-gray-500 uppercase text-2xl hover:underline"
+                                                    variants={itemVariantsClosed}
+                                                    onClick={() => handleCloseMenu()}
+                                                >
+                                                    <Link
+                                                        href={`/${selectedSegment}/${selectedCategory}/${subcategory.slug}`}
+                                                    >
+                                                        {subcategory.name}
+                                                    </Link>
+                                                </motion.li>
+                                            ))}
+                                        </ul>
+                                    )}
+                                </>
+                            )}
+                        </div>
                     </div>
                 </div>
             </motion.aside>
@@ -259,21 +260,6 @@ const Path = (props: PathProps) => (
         {...props}
     />
 )
-
-const asideVariants: Variants = {
-    isOpen: {
-        width: "300px",
-        transition: {
-            duration: DURATION
-        }
-    },
-    isClosed: {
-        width: "72px",
-        transition: {
-            duration: DURATION
-        }
-    }
-}
 
 const itemVariantsClosed: Variants = {
     isOpen: {

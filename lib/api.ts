@@ -5,9 +5,7 @@ const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_API_URL;
 
 
 export async function getHeroSection(): Promise<HomeSection[]> {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_STRAPI_API_URL}/api/home-section?populate[HomeSections][populate]=cover&populate[HomeSections][populate]=Button`, {
-        cache: 'no-store'
-    });
+    const res = await fetch(`${process.env.NEXT_PUBLIC_STRAPI_API_URL}/api/home-section?populate[HomeSections][populate]=cover&populate[HomeSections][populate]=Button`, );
 
     if (!res.ok) {
         throw new Error(`Failed to fetch segments: ${res.status}`);
@@ -16,16 +14,7 @@ export async function getHeroSection(): Promise<HomeSection[]> {
     const data = await res.json();
 
     if (data && data.data) {
-        return data.data.map((item: Segment) => {
-            return {
-                id: item.id,
-                name: item.name,
-                documentId: item.documentId,
-                slug: item.slug,
-                image: item.image,
-                categories: item.categories,
-            };
-        });
+        return data.data["HomeSections"]
     } else {
         console.error("Invalid segments data structure:", data);
         return [];
@@ -33,13 +22,8 @@ export async function getHeroSection(): Promise<HomeSection[]> {
 }
 
 export async function getSegments(): Promise<Segment[]> {
-    // if(process.env.NODE_ENV === "development") {
-    //     return getFakeSegments();
-    // }
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_STRAPI_API_URL}/api/segments?populate=*`, {
-        cache: 'no-store'
-    });
+    const res = await fetch(`${process.env.NEXT_PUBLIC_STRAPI_API_URL}/api/segments?populate=*`);
 
     if (!res.ok) {
         throw new Error(`Failed to fetch segments: ${res.status}`);
@@ -64,13 +48,16 @@ export async function getSegments(): Promise<Segment[]> {
     }
 }
 
-export async function getProducts({segment} : {segment?: string,}): Promise<Product[]> {
-    const apiUrl = `${STRAPI_URL}/api/products?populate=*`;
-    const filter = `&filters[segment][slug][$eq]=${segment}`;
+export async function getProducts({segment, slug} : {segment?: string, slug?: string}): Promise<Product[]> {
+    const apiUrl = `${STRAPI_URL}/api/products?populate[variants][populate]=image&populate[variants][populate]=color&populate[variants][populate]=sizes`;
+    const segmentFilter = segment ? `&filters[segment][slug][$eq]=${segment}` : '';
+    const slugFilter = slug ? `&filters[slug][$eq]=${slug}` : '';
 
-    const url = segment ? `${apiUrl}${filter}` : apiUrl;
+    const filter = `${segmentFilter}${slugFilter}`
 
-    const res = await fetch(url, { cache: "no-cache" });
+    const url = `${apiUrl}${filter}`;
+
+    const res = await fetch(url);
 
     if (!res.ok) {
         throw new Error(`Failed to fetch products: ${res.status}`);
@@ -78,7 +65,6 @@ export async function getProducts({segment} : {segment?: string,}): Promise<Prod
 
     const data = await res.json();
 
-    console.log(data)
     if (data) {
         return data.data
     } else {
@@ -90,7 +76,7 @@ export async function getProducts({segment} : {segment?: string,}): Promise<Prod
 export async function getSegment(slug: string): Promise<Segment|null> {
     const url = `${STRAPI_URL}/api/segments?&filters[slug][$eq]=${slug}&populate=*`;
 
-    const res = await fetch(url, { cache: "no-cache" });
+    const res = await fetch(url);
 
     if (!res.ok) {
         throw new Error(`Failed to fetch articles: ${res.status}`);

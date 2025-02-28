@@ -3,8 +3,7 @@ import FeaturedProducts from './components/FeaturedProducts';
 import {Button} from "@/app/components/ui/button";
 import dynamic from "next/dynamic";
 import { Metadata } from 'next/types';
-
-const Hero = dynamic(() => import('./components/HeroSection'))
+import HeroSectionServer from "@/app/components/hero-section.server";
 
 export const metadata: Metadata = {
   title: 'Pyiurs | Boutique d\'habillement',
@@ -14,7 +13,7 @@ export const metadata: Metadata = {
 export default function HomePage() {
   return (
   <div className="relative min-h-screen">
-    <Hero />
+    <HeroSectionServer />
     <SegmentServer />
     <FeaturedProducts />
     <section className="py-16 bg-primary text-white">

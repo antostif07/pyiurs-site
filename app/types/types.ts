@@ -75,7 +75,7 @@ interface ProductVariant {
     id: number;
     size: string;
     color: string;
-    image: Image;
+    image?: Image[];
 }
 
 interface Product {

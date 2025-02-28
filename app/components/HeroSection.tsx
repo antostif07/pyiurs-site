@@ -4,40 +4,18 @@ import React, { useState, useEffect } from 'react';
 import {motion, AnimatePresence, Variants} from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
+import {HomeSection} from "@/app/types/types";
 
-export default function Hero() {
-  const slides = [
-    {
-      id: 1,
-      imageUrl: '/images/image1.jpg',
-      title: 'Nouvelles Arrivées',
-      description: 'Explorez notre dernière collection',
-      buttonText: 'Nouvelle Collection',
-    },
-    {
-      id: 2,
-      imageUrl: '/images/image2.jpg',
-      title: 'Édition Limitée',
-      description: 'Découvrez des designs exclusifs',
-      buttonText: 'Nouvelle Collection',
-    },
-    {
-      id: 3,
-      imageUrl: '/images/image3.jpg',
-      title: 'Soldes d\'été',
-      description: 'Jusqu\'à 50% de réduction sur une sélection d\'articles',
-      buttonText: 'Nouvelle Collection',
-    },
-  ];
+export default function Hero({blocks}: {blocks: HomeSection[]}) {
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % slides.length);
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % blocks.length);
     }, 7000);
     return () => clearInterval(intervalId);
-  }, [slides.length]);
+  }, [blocks.length]);
 
   const variants: Variants = {
     enter: {
@@ -62,7 +40,7 @@ export default function Hero() {
   return (
       <div className="relative h-screen min-h-screen overflow-hidden">
         <AnimatePresence>
-          {slides.map((slide, index) => (
+          {blocks.map((slide, index) => (
               index === currentIndex && (
                   <motion.div
                       key={slide.id}
@@ -87,7 +65,7 @@ export default function Hero() {
                         animate={{ scale: 1.5 }}
                     >
                       <Image
-                          src={slide.imageUrl}
+                          src={`${process.env.NEXT_PUBLIC_STRAPI_API_URL}${slide.cover.formats.large?.url}`}
                           alt={`Hero Image ${slide.id}`}
                           fill
                           style={{
@@ -105,9 +83,9 @@ export default function Hero() {
                       <motion.h2 className="text-5xl md:text-5xl font-bold mb-4">
                         {slide.title}
                       </motion.h2>
-                      <motion.p className="text-xl mb-6">{slide.description}</motion.p>
+                      <motion.p className="text-xl mb-6">{slide.subtitle}</motion.p>
                       <motion.button className="bg-white text-black py-3 px-8 rounded-md hover:bg-gray-100 transition">
-                        <Link href={"/segments/femme"}>{slide.buttonText}</Link>
+                        <Link href={slide.Button.href}>{slide['Button'].title}</Link>
                       </motion.button>
                     </div>
                   </motion.div>

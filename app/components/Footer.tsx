@@ -1,9 +1,11 @@
 import Link from 'next/link';
 import React from 'react';
+import {motion, Variants} from "framer-motion";
+import {asideVariants} from "@/lib/utils";
 
-const Footer = () => {
+const Footer = ({animate, variants, initial}: {animate: "isOpen" | "isClosed", variants: Variants, initial: string}) => {
   return (
-    <footer className="bg-slate-950 border-t text-white">
+    <motion.footer className={`bg-slate-950 border-t text-white`} variants={variants} animate={animate} initial={initial}>
       <div className="max-w-7xl mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
@@ -44,7 +46,7 @@ const Footer = () => {
           <p>&copy; {new Date().getFullYear()} Pyiurs. All rights reserved.</p>
         </div>
       </div>
-    </footer>
+    </motion.footer>
   );
 };
 
