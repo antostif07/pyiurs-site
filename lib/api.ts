@@ -1,4 +1,3 @@
-import { getFakeCategories, getFakeSegments } from "@/app/fakeData/data";
 import {Category, HomeSection, Product, Segment, SubCategory} from "@/app/types/types";
 
 const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_API_URL;
@@ -22,7 +21,6 @@ export async function getHeroSection(): Promise<HomeSection[]> {
 }
 
 export async function getSegments(): Promise<Segment[]> {
-
     const res = await fetch(`${process.env.NEXT_PUBLIC_STRAPI_API_URL}/api/segments?populate=*`);
 
     if (!res.ok) {
@@ -48,12 +46,13 @@ export async function getSegments(): Promise<Segment[]> {
     }
 }
 
-export async function getProducts({segment, slug} : {segment?: string, slug?: string}): Promise<Product[]> {
-    const apiUrl = `${STRAPI_URL}/api/products?populate[variants][populate]=image&populate[variants][populate]=color&populate[variants][populate]=sizes`;
+export async function getProducts({segment, slug, limit,} : {segment?: string, slug?: string, limit?: number,}): Promise<Product[]> {
+    const apiUrl = `${STRAPI_URL}/api/products?populate=segment&populate=category&populate=variants.image&populate=variants.sizes&populate=variants.color`;
     const segmentFilter = segment ? `&filters[segment][slug][$eq]=${segment}` : '';
     const slugFilter = slug ? `&filters[slug][$eq]=${slug}` : '';
+    const limitFilter = limit ? `&limit=${limit}` : '';
 
-    const filter = `${segmentFilter}${slugFilter}`
+    const filter = `${segmentFilter}${slugFilter}${limitFilter}`;
 
     const url = `${apiUrl}${filter}`;
 
@@ -64,7 +63,7 @@ export async function getProducts({segment, slug} : {segment?: string, slug?: st
     }
 
     const data = await res.json();
-
+    
     if (data) {
         return data.data
     } else {

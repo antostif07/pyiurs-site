@@ -1,9 +1,9 @@
-import SegmentServer from './components/segment.server';
-import FeaturedProducts from './components/FeaturedProducts';
 import {Button} from "@/app/components/ui/button";
-import dynamic from "next/dynamic";
 import { Metadata } from 'next/types';
-import HeroSectionServer from "@/app/components/hero-section.server";
+import Hero from '@/components/hero.server';
+import FeaturedProducts from '@/components/featured-products';
+import Segments from "@/components/segments";
+import HomeCollection from "@/components/home-collection";
 
 export const metadata: Metadata = {
   title: 'Pyiurs | Boutique d\'habillement',
@@ -12,10 +12,11 @@ export const metadata: Metadata = {
 
 export default function HomePage() {
   return (
-  <div className="relative min-h-screen">
-    <HeroSectionServer />
-    <SegmentServer />
+  <div className="flex flex-col min-h-screen">
+    <Hero />
+    <Segments />
     <FeaturedProducts />
+    <HomeCollection />
     <section className="py-16 bg-primary text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h2 className="text-3xl font-bold mb-4">Restez informé</h2>

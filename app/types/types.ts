@@ -73,9 +73,9 @@ interface Image {
 
 interface ProductVariant {
     id: number;
-    size: string;
-    color: string;
-    image?: Image[];
+    sizes: ISize[];
+    color: IColor;
+    image: Image[];
 }
 
 interface Product {
@@ -90,6 +90,9 @@ interface Product {
     image: Image;
     variants: ProductVariant[];
     slug: string;
+    category: Category;
+    sub_category: SubCategory;
+    segment: Segment;
 }
 
 interface Pagination {
@@ -172,6 +175,18 @@ interface IButton {
     id: string;
     title: string;
     href: string;
+}
+
+interface IColor {
+    id: number;
+    name: string;
+    hex: string;
+}
+
+interface ISize {
+    id: number;
+    name: string;
+    shorten: string;
 }
 
 export type { SubCategory, ImageFormats, Image, Product, Pagination, ApiResponse, ProductVariant, Segment, Category, CartState, CartItem, HomeSection, IButton };

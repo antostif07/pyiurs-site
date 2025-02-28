@@ -8,8 +8,6 @@ import { useInView } from 'react-intersection-observer';
 import {
     ChevronRight,
     Star,
-    Truck,
-    RefreshCw,
     ShieldCheck,
     Heart,
     Share2,
@@ -18,65 +16,16 @@ import {
     ShoppingCart
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {toast} from "sonner";
 import {Product} from "@/app/types/types";
 // import FeaturedProducts from '@/components/featured-products';
 
-// Exemple de produit
-const product = {
-    id: "robe-fleurie-ete",
-    name: "Robe Fleurie Été",
-    price: 89.99,
-    originalPrice: 129.99,
-    rating: 4.8,
-    reviews: 124,
-    description: "Cette robe légère et élégante est parfaite pour les journées ensoleillées. Confectionnée en coton biologique, elle offre un confort optimal tout en vous assurant un style impeccable. Son motif floral délicat et sa coupe flatteuse en font une pièce incontournable de votre garde-robe estivale.",
-    features: [
-        "100% coton biologique",
-        "Doublure en viscose",
-        "Fermeture à boutons",
-        "Lavable en machine à 30°C",
-        "Fabriquée en France"
-    ],
-    colors: [
-        { name: "Rouge", value: "#D32F2F", selected: true },
-        { name: "Bleu", value: "#1976D2", selected: false },
-        { name: "Noir", value: "#212121", selected: false }
-    ],
-    sizes: [
-        { name: "XS", available: true, selected: false },
-        { name: "S", available: true, selected: true },
-        { name: "M", available: true, selected: false },
-        { name: "L", available: true, selected: false },
-        { name: "XL", available: false, selected: false }
-    ],
-    images: [
-        "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?q=80&w=1976&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1496747611176-843222e1e57c?q=80&w=2073&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1566174053879-31528523f8c6?q=80&w=1974&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1618932260643-eee4a2f652a6?q=80&w=1980&auto=format&fit=crop"
-    ],
-    category: "Robes",
-    isNew: true,
-    isSale: true,
-    stock: 15,
-    sku: "RF-2025-001",
-    details: {
-        material: "La robe est confectionnée en coton biologique certifié GOTS, garantissant une production respectueuse de l'environnement et des conditions de travail équitables. La doublure en viscose assure un confort optimal et une belle tenue du vêtement.",
-        fit: "Coupe régulière, légèrement cintrée à la taille pour mettre en valeur la silhouette. La longueur midi est élégante et polyvalente, adaptée à toutes les morphologies.",
-        care: "Lavable en machine à 30°C, cycle délicat. Ne pas utiliser d'eau de Javel. Séchage à plat recommandé. Repassage à température moyenne. Nettoyage à sec possible."
-    }
-};
-
-export default function ProductPage({ product: prod }: { product: Product }) {
-    console.log(prod)
+export default function ProductPage({ product }: { product: Product }) {
     const [quantity, setQuantity] = useState(1);
     const [selectedImage, setSelectedImage] = useState(0);
-    const [selectedColor, setSelectedColor] = useState(product.colors.findIndex(c => c.selected));
-    const [selectedSize, setSelectedSize] = useState(product.sizes.findIndex(s => s.selected));
+    const [selectedVariant, setSelectedVariant] = useState(0);
 
     const { ref, inView } = useInView({
         triggerOnce: true,
@@ -90,7 +39,7 @@ export default function ProductPage({ product: prod }: { product: Product }) {
     };
 
     const increaseQuantity = () => {
-        if (quantity < product.stock) {
+        if (quantity < 6) {
             setQuantity(quantity + 1);
         }
     };
@@ -104,20 +53,20 @@ export default function ProductPage({ product: prod }: { product: Product }) {
     };
 
     return (
-        <div className="pt-24 pb-16">
-            <div className="container mx-auto px-4">
+        <div className="pt-32 pb-16">
+            <div className="container mx-auto px-24">
                 {/* Breadcrumb */}
                 <div className="flex items-center text-sm text-muted-foreground mb-8">
                     <Link href="/" className="hover:text-foreground transition-colors">
                         Accueil
                     </Link>
                     <ChevronRight className="h-4 w-4 mx-2" />
-                    <Link href="/products" className="hover:text-foreground transition-colors">
-                        Boutique
+                    <Link href={`/products/${product.segment.slug}`} className="hover:text-foreground transition-colors">
+                        {product.segment.name}
                     </Link>
                     <ChevronRight className="h-4 w-4 mx-2" />
-                    <Link href={`/categories/${product.category.toLowerCase()}`} className="hover:text-foreground transition-colors">
-                        {product.category}
+                    <Link href={`/products/${product.segment.slug}/${product.category.slug}`} className="hover:text-foreground transition-colors">
+                        {product.category.name}
                     </Link>
                     <ChevronRight className="h-4 w-4 mx-2" />
                     <span className="text-foreground">{product.name}</span>
@@ -139,22 +88,22 @@ export default function ProductPage({ product: prod }: { product: Product }) {
                     >
                         <div className="relative aspect-[4/5] rounded-lg overflow-hidden">
                             <Image
-                                src={product.images[selectedImage]}
+                                src={`${process.env.NEXT_PUBLIC_STRAPI_API_URL}${product.variants[selectedImage].image[0].formats.large?.url}`}
                                 alt={product.name}
                                 fill
                                 className="object-cover"
                             />
-                            <div className="absolute top-4 left-4 flex flex-col gap-2">
+                            {/* <div className="absolute top-4 left-4 flex flex-col gap-2">
                                 {product.isNew && (
                                     <Badge className="bg-primary text-primary-foreground">Nouveau</Badge>
                                 )}
                                 {product.isSale && (
                                     <Badge variant="destructive">Soldes</Badge>
                                 )}
-                            </div>
+                            </div> */}
                         </div>
                         <div className="grid grid-cols-4 gap-4">
-                            {product.images.map((image, index) => (
+                            {product.variants[selectedVariant].image.map((img, index) => (
                                 <button
                                     key={index}
                                     onClick={() => setSelectedImage(index)}
@@ -163,7 +112,7 @@ export default function ProductPage({ product: prod }: { product: Product }) {
                                     }`}
                                 >
                                     <Image
-                                        src={image}
+                                        src={`${process.env.NEXT_PUBLIC_STRAPI_API_URL}${img.formats.medium?.url}`}
                                         alt={`${product.name} - Vue ${index + 1}`}
                                         fill
                                         className="object-cover"
@@ -180,15 +129,15 @@ export default function ProductPage({ product: prod }: { product: Product }) {
                         transition={{ duration: 0.5, delay: 0.2 }}
                     >
                         <div className="flex items-center text-sm text-muted-foreground mb-2">
-                            <span>{product.category}</span>
+                            <span>{product.category.name}</span>
                             <span className="mx-2">•</span>
-                            <span>SKU: {product.sku}</span>
-                            <span className="mx-2">•</span>
+                            {/* <span>SKU: {product.sku}</span>
+                            <span className="mx-2">•</span> */}
                             <div className="flex items-center">
                                 <Star className="h-4 w-4 fill-current text-yellow-500 mr-1" />
-                                <span>{product.rating}</span>
+                                <span>{4.5}</span>
                                 <Link href="#reviews" className="ml-1 underline">
-                                    ({product.reviews} avis)
+                                    ({26} avis)
                                 </Link>
                             </div>
                         </div>
@@ -196,8 +145,8 @@ export default function ProductPage({ product: prod }: { product: Product }) {
                         <h1 className="text-3xl md:text-4xl font-bold mb-4">{product.name}</h1>
 
                         <div className="flex items-center mb-6">
-                            <span className="text-2xl font-bold">{product.price.toFixed(2)} €</span>
-                            {product.originalPrice && (
+                            <span className="text-2xl font-bold">{product.price.toFixed(2)} $</span>
+                            {/* {product.originalPrice && (
                                 <span className="ml-3 text-muted-foreground line-through text-lg">
                   {product.originalPrice.toFixed(2)} €
                 </span>
@@ -206,7 +155,7 @@ export default function ProductPage({ product: prod }: { product: Product }) {
                                 <Badge variant="destructive" className="ml-3">
                                     -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
                                 </Badge>
-                            )}
+                            )} */}
                         </div>
 
                         <p className="text-muted-foreground mb-6">
@@ -219,21 +168,21 @@ export default function ProductPage({ product: prod }: { product: Product }) {
                                 <div className="flex justify-between items-center mb-2">
                                     <span className="font-medium">Couleur</span>
                                     <span className="text-sm text-muted-foreground">
-                    {product.colors[selectedColor].name}
+                    {product.variants[selectedVariant].color.name}
                   </span>
                                 </div>
                                 <div className="flex space-x-3">
-                                    {product.colors.map((color, index) => (
+                                    {product.variants.map((variant, index) => (
                                         <button
                                             key={index}
-                                            onClick={() => setSelectedColor(index)}
+                                            onClick={() => setSelectedVariant(index)}
                                             className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                                                selectedColor === index ? 'ring-2 ring-primary ring-offset-2' : ''
+                                                selectedVariant === index ? 'ring-2 ring-primary ring-offset-2' : ''
                                             }`}
-                                            style={{ backgroundColor: color.value }}
-                                            aria-label={`Couleur ${color.name}`}
+                                            style={{ backgroundColor: variant.color.hex }}
+                                            aria-label={`Couleur ${variant.color.name}`}
                                         >
-                                            {selectedColor === index && (
+                                            {selectedVariant === index && (
                                                 <div className="w-6 h-6 rounded-full bg-white/30 flex items-center justify-center">
                                                     <Check />
                                                 </div>
@@ -244,7 +193,7 @@ export default function ProductPage({ product: prod }: { product: Product }) {
                             </div>
 
                             {/* Size Selection */}
-                            <div>
+                            {/* <div>
                                 <div className="flex justify-between items-center mb-2">
                                     <span className="font-medium">Taille</span>
                                     <Link href="#" className="text-sm text-primary underline">
@@ -274,7 +223,7 @@ export default function ProductPage({ product: prod }: { product: Product }) {
                                         Cette taille n'est pas disponible actuellement.
                                     </p>
                                 )}
-                            </div>
+                            </div> */}
 
                             {/* Quantity */}
                             <div>
@@ -293,13 +242,13 @@ export default function ProductPage({ product: prod }: { product: Product }) {
                                         variant="outline"
                                         size="icon"
                                         onClick={increaseQuantity}
-                                        disabled={quantity >= product.stock}
+                                        // disabled={quantity >= product.stock}
                                     >
                                         <Plus className="h-4 w-4" />
                                     </Button>
-                                    <span className="ml-4 text-sm text-muted-foreground">
+                                    {/* <span className="ml-4 text-sm text-muted-foreground">
                     {product.stock} disponibles
-                  </span>
+                  </span> */}
                                 </div>
                             </div>
                         </div>
@@ -331,28 +280,20 @@ export default function ProductPage({ product: prod }: { product: Product }) {
                         {/* Features */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
                             <div className="flex items-center">
-                                <Truck className="h-5 w-5 mr-2 text-primary" />
-                                <span className="text-sm">Livraison gratuite dès 100€</span>
-                            </div>
-                            <div className="flex items-center">
-                                <RefreshCw className="h-5 w-5 mr-2 text-primary" />
-                                <span className="text-sm">Retours sous 30 jours</span>
-                            </div>
-                            <div className="flex items-center">
                                 <ShieldCheck className="h-5 w-5 mr-2 text-primary" />
                                 <span className="text-sm">Garantie qualité</span>
                             </div>
                         </div>
 
                         {/* Features List */}
-                        <div className="mb-8">
+                        {/* <div className="mb-8">
                             <h3 className="font-medium mb-2">Caractéristiques</h3>
                             <ul className="list-disc list-inside space-y-1 text-muted-foreground">
                                 {product.features.map((feature, index) => (
                                     <li key={index}>{feature}</li>
                                 ))}
                             </ul>
-                        </div>
+                        </div> */}
                     </motion.div>
                 </motion.div>
 
@@ -361,7 +302,6 @@ export default function ProductPage({ product: prod }: { product: Product }) {
                     <Tabs defaultValue="details">
                         <TabsList className="grid w-full grid-cols-3">
                             <TabsTrigger value="details">Détails du produit</TabsTrigger>
-                            <TabsTrigger value="care">Entretien</TabsTrigger>
                             <TabsTrigger value="reviews">Avis clients</TabsTrigger>
                         </TabsList>
                         <TabsContent value="details" className="mt-6">
@@ -371,23 +311,8 @@ export default function ProductPage({ product: prod }: { product: Product }) {
                                     <p className="text-muted-foreground mb-4">
                                         {product.description}
                                     </p>
-                                    <p className="text-muted-foreground">
-                                        {product.details.material}
-                                    </p>
-                                </div>
-                                <div>
-                                    <h3 className="text-lg font-medium mb-4">Coupe et taille</h3>
-                                    <p className="text-muted-foreground">
-                                        {product.details.fit}
-                                    </p>
                                 </div>
                             </div>
-                        </TabsContent>
-                        <TabsContent value="care" className="mt-6">
-                            <h3 className="text-lg font-medium mb-4">Instructions d'entretien</h3>
-                            <p className="text-muted-foreground">
-                                {product.details.care}
-                            </p>
                         </TabsContent>
                         <TabsContent value="reviews" className="mt-6" id="reviews">
                             <div className="flex items-center mb-6">
@@ -396,14 +321,14 @@ export default function ProductPage({ product: prod }: { product: Product }) {
                                         <Star
                                             key={i}
                                             className={`h-5 w-5 ${
-                                                i < Math.floor(product.rating) ? "text-yellow-500 fill-yellow-500" : "text-gray-300"
+                                                i < Math.floor(4.5) ? "text-yellow-500 fill-yellow-500" : "text-gray-300"
                                             }`}
                                         />
                                     ))}
                                 </div>
-                                <span className="text-xl font-medium">{product.rating}</span>
+                                <span className="text-xl font-medium">{4.5}</span>
                                 <span className="mx-2 text-muted-foreground">•</span>
-                                <span className="text-muted-foreground">{product.reviews} avis</span>
+                                <span className="text-muted-foreground">{26} avis</span>
                             </div>
 
                             <Separator className="my-6" />
