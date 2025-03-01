@@ -13,7 +13,7 @@ interface ProductGridProps {
 
 export default function ProductGrid({ products }: ProductGridProps) {
     const {addToCart} = useCartStore()
-
+    
     const cardVariants = {
         hidden: { opacity: 0, y: 50 },
         visible: {

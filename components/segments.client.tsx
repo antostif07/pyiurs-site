@@ -8,37 +8,6 @@ import { Button } from '@/components/ui/button';
 import { ChevronRight } from 'lucide-react';
 import { Segment } from '@/app/types/types';
 
-const categories = [
-  {
-    id: 1,
-    name: "Robes",
-    description: "Élégantes et confortables pour toutes les occasions",
-    image: "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?q=80&w=1992&auto=format&fit=crop",
-    link: "/categories/dresses"
-  },
-  {
-    id: 2,
-    name: "Hauts",
-    description: "Des t-shirts aux blouses sophistiquées",
-    image: "https://images.unsplash.com/photo-1434389677669-e08b4cac3105?q=80&w=2005&auto=format&fit=crop",
-    link: "/categories/tops"
-  },
-  {
-    id: 3,
-    name: "Pantalons",
-    description: "Jeans, pantalons habillés et leggings",
-    image: "https://images.unsplash.com/photo-1509551388413-e18d0ac5d495?q=80&w=1974&auto=format&fit=crop",
-    link: "/categories/pants"
-  },
-  {
-    id: 4,
-    name: "Accessoires",
-    description: "Bijoux, sacs et plus encore",
-    image: "https://images.unsplash.com/photo-1601924582970-9238bcb495d9?q=80&w=1976&auto=format&fit=crop",
-    link: "/categories/accessories"
-  }
-];
-
 export const Segments = ({segments}: {segments: Segment[]}) => {
   const { ref, inView } = useInView({
     triggerOnce: true,

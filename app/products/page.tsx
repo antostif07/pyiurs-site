@@ -1,6 +1,6 @@
 // app/segments/page.tsx
 import React from 'react';
-import {getSegments} from "@/lib/actions";
+import {getSegments} from "@/lib/api";
 import {Segment} from "@/app/types/types";
 import SegmentClient from "@/app/components/segment.client";
 import SegmentHeroSection from "@/app/components/segments/PageHeroSection";

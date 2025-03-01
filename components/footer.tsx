@@ -1,8 +1,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
-import { Facebook, Instagram, Twitter, Youtube, MapPin, Phone, Mail, CreditCard, Truck, ShieldCheck } from 'lucide-react';
+import { Facebook, Instagram, Twitter, Youtube, MapPin, Phone, Mail, } from 'lucide-react';
 import PyiursLogo from '@/app/components/ui/PyiursLogo';
 
 const Footer = () => {
@@ -74,13 +73,13 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link href="/categories" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Catégories
+                <Link href="/about" className="text-muted-foreground hover:text-foreground transition-colors">
+                  À propos
                 </Link>
               </li>
               <li>
-                <Link href="/about" className="text-muted-foreground hover:text-foreground transition-colors">
-                  À propos
+                <Link href="/blog" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Blog
                 </Link>
               </li>
               <li>

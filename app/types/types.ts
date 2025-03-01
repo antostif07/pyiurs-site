@@ -190,4 +190,17 @@ interface ISize {
     shorten: string;
 }
 
-export type { SubCategory, ImageFormats, Image, Product, Pagination, ApiResponse, ProductVariant, Segment, Category, CartState, CartItem, HomeSection, IButton };
+interface ICollection {
+    id: number;
+    documentId: string;
+    name: string;
+    description: string;
+    createdAt: string;
+    updatedAt: string;
+    publishedAt: string;
+    image?: Image;
+    slug: string;
+    products: Product[];
+}
+
+export type { ICollection, SubCategory, ImageFormats, Image, Product, Pagination, ApiResponse, ProductVariant, Segment, Category, CartState, CartItem, HomeSection, IButton };

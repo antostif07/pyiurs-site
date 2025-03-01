@@ -352,9 +352,9 @@ export default function ProductPage({ product }: { product: Product }) {
                                             <span className="mx-2 text-muted-foreground">•</span>
                                             <span className="text-sm text-muted-foreground">Il y a 2 semaines</span>
                                         </div>
-                                        <h4 className="font-medium mb-1">Magnifique robe, parfaite pour l'été !</h4>
+                                        <h4 className="font-medium mb-1">{`Magnifique robe, parfaite pour l'été !`}</h4>
                                         <p className="text-muted-foreground">
-                                            J'ai acheté cette robe pour un mariage et elle est absolument parfaite ! La matière est de qualité,
+                                            {`J'ai acheté cette robe pour un mariage et elle est absolument parfaite ! La matière est de qualité,`}
                                             la coupe est flatteuse et les couleurs sont magnifiques. Je recommande vivement.
                                         </p>
                                     </div>
@@ -380,7 +380,7 @@ export default function ProductPage({ product }: { product: Product }) {
                                         <h4 className="font-medium mb-1">Très belle robe mais taille un peu grand</h4>
                                         <p className="text-muted-foreground">
                                             La robe est superbe, la matière est agréable et les finitions sont soignées.
-                                            Seul bémol, elle taille un peu grand, j'aurais dû prendre une taille en dessous.
+                                            {`Seul bémol, elle taille un peu grand, j'aurais dû prendre une taille en dessous.`}
                                             Sinon, je suis très satisfaite de mon achat.
                                         </p>
                                     </div>
@@ -407,7 +407,7 @@ export default function ProductPage({ product }: { product: Product }) {
                                         <p className="text-muted-foreground">
                                             Cette robe est un véritable coup de cœur ! Elle est encore plus belle en vrai que sur les photos.
                                             La matière est de qualité, la coupe est parfaite et les détails sont soignés.
-                                            Je l'ai portée pour une soirée et j'ai reçu de nombreux compliments.
+                                            {`Je l'ai portée pour une soirée et j'ai reçu de nombreux compliments.`}
                                         </p>
                                     </div>
                                 </div>

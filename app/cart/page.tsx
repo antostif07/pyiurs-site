@@ -107,7 +107,7 @@ export default function CartPage() {
                         </div>
                         <h1 className="text-2xl font-bold mb-2">Votre panier est vide</h1>
                         <p className="text-muted-foreground mb-8 max-w-md">
-                            Il semble que vous n'ayez pas encore ajouté d'articles à votre panier.
+                            {`Il semble que vous n'ayez pas encore ajouté d'articles à votre panier.`}
                             Parcourez notre collection et trouvez des pièces qui vous plaisent.
                         </p>
                         <Link href="/products">
@@ -241,7 +241,7 @@ export default function CartPage() {
                             </div>
                             <div className="mt-4 flex items-center text-sm text-muted-foreground">
                                 <Truck className="h-4 w-4 mr-2" />
-                                <span>Livraison gratuite à partir de 100€ d'achat</span>
+                                <span>{`Livraison gratuite à partir de 100€ d'achat`}</span>
                             </div>
                         </div>
                     </div>
@@ -305,12 +305,12 @@ export default function CartPage() {
                                 <ArrowRight className="h-4 w-4" />
                             </Button>
 
-                            <div className="flex justify-center space-x-4 mb-4">
+                            {/* <div className="flex justify-center space-x-4 mb-4">
                                 <img src="https://cdn-icons-png.flaticon.com/512/196/196578.png" alt="Visa" className="h-8" />
                                 <img src="https://cdn-icons-png.flaticon.com/512/196/196561.png" alt="MasterCard" className="h-8" />
                                 <img src="https://cdn-icons-png.flaticon.com/512/196/196565.png" alt="PayPal" className="h-8" />
                                 <img src="https://cdn-icons-png.flaticon.com/512/196/196539.png" alt="American Express" className="h-8" />
-                            </div>
+                            </div> */}
 
                             <div className="space-y-3 text-sm text-muted-foreground">
                                 <div className="flex items-center">

@@ -31,8 +31,8 @@ export const Collection = () => {
             <span className="text-primary font-medium">Nouvelle Collection</span>
             <h2 className="text-3xl md:text-4xl font-bold mt-2 mb-4">Collection Été 2025</h2>
             <p className="text-muted-foreground mb-6 text-lg">
-              Notre nouvelle collection d'été est arrivée avec des pièces légères, colorées et élégantes. 
-              Des matières naturelles et respirantes pour vous accompagner tout au long de la saison estivale.
+              {`Notre nouvelle collection d'été est arrivée avec des pièces légères, colorées et élégantes. `}
+              {`Des matières naturelles et respirantes pour vous accompagner tout au long de la saison estivale.`}
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Link href="/products/summer-collection">
@@ -60,7 +60,7 @@ export const Collection = () => {
                 />
               </div>
               <div className="absolute -bottom-6 -left-6 md:-left-12 w-40 h-40 md:w-60 md:h-60 bg-primary/10 backdrop-blur-sm rounded-lg p-6 flex flex-col justify-center">
-                <span className="text-xl md:text-2xl font-bold">Jusqu'à</span>
+                <span className="text-xl md:text-2xl font-bold">{`Jusqu'à`}</span>
                 <span className="text-3xl md:text-5xl font-bold text-primary">30%</span>
                 <span className="text-xl md:text-2xl font-bold">de réduction</span>
               </div>

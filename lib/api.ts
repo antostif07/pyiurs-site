@@ -1,4 +1,4 @@
-import {Category, HomeSection, Product, Segment, SubCategory} from "@/app/types/types";
+import {Category, HomeSection, ICollection, Product, Segment, SubCategory} from "@/app/types/types";
 
 const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_API_URL;
 
@@ -46,13 +46,31 @@ export async function getSegments(): Promise<Segment[]> {
     }
 }
 
-export async function getProducts({segment, slug, limit,} : {segment?: string, slug?: string, limit?: number,}): Promise<Product[]> {
-    const apiUrl = `${STRAPI_URL}/api/products?populate=segment&populate=category&populate=variants.image&populate=variants.sizes&populate=variants.color`;
+export async function getCollections(): Promise<ICollection[]> {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_STRAPI_API_URL}/api/collections?populate=image`);
+
+    if (!res.ok) {
+        throw new Error(`Failed to fetch collections: ${res.status}`);
+    }
+
+    const data = await res.json();
+
+    if (data && data.data) {
+        return data.data;
+    } else {
+        console.error("Invalid segments data structure:", data);
+        return [];
+    }
+}
+
+export async function getProducts({segment, slug, limit, subCategory,} : {segment?: string, slug?: string, limit?: number, subCategory?: string}): Promise<Product[]> {
+    const apiUrl = `${STRAPI_URL}/api/products?populate=image&populate=segment&populate=category&populate=variants.image&populate=variants.sizes&populate=variants.color&sort=id:desc`;
     const segmentFilter = segment ? `&filters[segment][slug][$eq]=${segment}` : '';
     const slugFilter = slug ? `&filters[slug][$eq]=${slug}` : '';
-    const limitFilter = limit ? `&limit=${limit}` : '';
+    const subCategorySlug = subCategory ? `&filters[sub_category][slug][$eq]=${subCategory}` : '';
+    const limitFilter = limit ? `&pagination[limit]=${limit}` : '';
 
-    const filter = `${segmentFilter}${slugFilter}${limitFilter}`;
+    const filter = `${segmentFilter}${slugFilter}${limitFilter}${subCategorySlug}`;
 
     const url = `${apiUrl}${filter}`;
 
@@ -91,10 +109,11 @@ export async function getSegment(slug: string): Promise<Segment|null> {
     }
 }
 
-export async function getCategories({segment}: {segment?: string}): Promise<Category[]> {
+export async function getCategories({segment, slug}: {segment?: string, slug?: string}): Promise<Category[]> {
     const apiUrl = `${STRAPI_URL}/api/categories?populate=*`;
-
-    const filter = segment ? `&filters[segments][slug][$eq]=${segment}` : '';
+    const segmentFilter = segment ? `&filters[segments][slug][$eq]=${segment}` : '';
+    const slugFilter = slug ? `&filters[slug][$eq]=${slug}` : '';
+    const filter = `${segmentFilter}${slugFilter}`;
 
     const res = await fetch(`${apiUrl}${filter}`, { next: { revalidate: 60 } });
 
@@ -112,15 +131,16 @@ export async function getCategories({segment}: {segment?: string}): Promise<Cate
     }
 }
 
-export async function getSubCategories({segment, category}: {segment?: string, category?: string}): Promise<SubCategory[]> {
+export async function getSubCategories({segment, category, slug}: {segment?: string, category?: string, slug?: string}): Promise<SubCategory[]> {
     const apiUrl = `${STRAPI_URL}/api/sub-categories?populate=category`;
 
     const filterSegment = segment ? `&filters[segments][slug][$eq]=${segment}` : '';
 
     const filterCategory = category ? `&filters[category][slug][$eq]=${category}` : '';
 
+    const slugFilter = slug ? `&filters[slug][$eq]=${slug}` : '';
 
-    const res = await fetch(`${apiUrl}${filterSegment}${filterCategory}`, { next: { revalidate: 60 } });
+    const res = await fetch(`${apiUrl}${filterSegment}${filterCategory}${slugFilter}`, { next: { revalidate: 60 } });
 
     if (!res.ok) {
         throw new Error(`Failed to fetch sub-categories: ${res.status}`);

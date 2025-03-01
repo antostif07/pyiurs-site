@@ -1,6 +1,6 @@
 'use client';
 
-import {useState, useEffect, useRef} from 'react';
+import {useState, useEffect, useRef, useCallback} from 'react';
 import {ArrowLeft, Search, ShoppingBag,} from 'lucide-react';
 import {motion, Variants} from 'framer-motion';
 import {Category, Segment, SubCategory} from "@/app/types/types";
@@ -45,9 +45,11 @@ export default function Menu({open, setOpenAction}: {open: 'isOpen' | 'isClosed'
     enabled: !!selectedCategory
     })
 
-    const handleCloseMenu = () => {
-        setOpenAction('isClosed')
-    }
+    const handleCloseMenu = useCallback(() => {
+        return () => {
+            setOpenAction('isClosed')
+        }
+    }, [])
     
 
     useEffect(() => {
@@ -65,7 +67,7 @@ export default function Menu({open, setOpenAction}: {open: 'isOpen' | 'isClosed'
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
         };
-    }, [open]);
+    }, [open, handleCloseMenu]);
         
     return (
             <motion.aside
@@ -294,10 +296,3 @@ const itemVariantsOpen: Variants = {
         },
     },
 }
-
-// Variants pour l'animation de transition avec Framer Motion
-const pageVariants = {
-    hidden: { x: 100, opacity: 0 },
-    visible: { x: 0, opacity: 1 },
-    exit: { x: -100, opacity: 0 }
-  }

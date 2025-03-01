@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import React from 'react';
 import {motion, Variants} from "framer-motion";
-import {asideVariants} from "@/lib/utils";
 
 const Footer = ({animate, variants, initial}: {animate: "isOpen" | "isClosed", variants: Variants, initial: string}) => {
   return (

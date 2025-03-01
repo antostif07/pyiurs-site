@@ -1,8 +1,6 @@
 // components/FeaturedProducts.js
 import React from 'react';
 import { ApiResponse, Product } from "@/app/types/types";
-import Image from "next/image";
-import Link from 'next/link';
 import ProductCard from "@/app/components/product-card";
 
 const FeaturedProducts = async () => {

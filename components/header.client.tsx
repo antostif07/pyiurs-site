@@ -133,6 +133,7 @@ const HeaderClient = ({ mainCategories }: HeaderClientProps) => {
               </div>
 
               <Link href="/about" className={cn('font-medium hover:text-primary transition-colors', currentRoute === '/about' ? 'text-primary underline' : '')}>À propos</Link>
+              <Link href="/blog" className={cn('font-medium hover:text-primary transition-colors', currentRoute === '/about' ? 'text-primary underline' : '')}>Blog</Link>
               <Link href="/contact" className={cn('font-medium hover:text-primary transition-colors', currentRoute === '/contact' ? 'text-primary underline' : '')}>Contact</Link>
             </nav>
 

@@ -16,7 +16,7 @@ export const Hero = ({ blocks }: { blocks: HomeSection[] }) => {
       setCurrentSlide((prev) => (prev + 1) % blocks.length);
     }, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [blocks.length]);
 
   return (
     <div className="relative h-screen w-full overflow-hidden">
