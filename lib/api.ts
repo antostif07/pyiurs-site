@@ -21,7 +21,7 @@ export async function getHeroSection(): Promise<HomeSection[]> {
 }
 
 export async function getSegments(): Promise<Segment[]> {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_STRAPI_API_URL}/api/segments?populate=*`);
+    const res = await fetch(`${process.env.NEXT_PUBLIC_STRAPI_API_URL}/api/segments?populate=categories&populate=categories.sub_categories&populate=image`);
 
     if (!res.ok) {
         throw new Error(`Failed to fetch segments: ${res.status}`);

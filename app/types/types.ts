@@ -131,6 +131,7 @@ interface Category {
     slug: string;
     createdAt: string;
     cover?: Image;
+    sub_categories: SubCategory[];
 }
 
 interface CartItem {
