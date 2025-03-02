@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Product, SubCategory } from '@/app/types/types';
-import ProductGrid from '@/app/components/ProductGrid';
+import ProductGrid from './product-grid';
 
 export default function SubcategoryClient({subCategory, products}: {subCategory?: SubCategory, products: Product[]}) {
   const [filter, setFilter] = useState('all'); // 'all', 'new', 'featured'

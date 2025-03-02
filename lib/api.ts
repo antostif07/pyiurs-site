@@ -64,7 +64,7 @@ export async function getCollections(): Promise<ICollection[]> {
 }
 
 export async function getProducts({segment, slug, limit, subCategory,} : {segment?: string, slug?: string, limit?: number, subCategory?: string}): Promise<Product[]> {
-    const apiUrl = `${STRAPI_URL}/api/products?populate=image&populate=segment&populate=category&populate=variants.image&populate=variants.sizes&populate=variants.color&sort=id:desc`;
+    const apiUrl = `${STRAPI_URL}/api/products?populate=sub_category&populate=image&populate=segment&populate=category&populate=variants.image&populate=variants.sizes&populate=variants.color&sort=id:desc`;
     const segmentFilter = segment ? `&filters[segment][slug][$eq]=${segment}` : '';
     const slugFilter = slug ? `&filters[slug][$eq]=${slug}` : '';
     const subCategorySlug = subCategory ? `&filters[sub_category][slug][$eq]=${subCategory}` : '';
