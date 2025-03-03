@@ -203,4 +203,4 @@ interface ICollection {
     products: Product[];
 }
 
-export type { ICollection, SubCategory, ImageFormats, Image, Product, Pagination, ApiResponse, ProductVariant, Segment, Category, CartState, CartItem, HomeSection, IButton };
+export type { ISize, IColor, ICollection, SubCategory, ImageFormats, Image, Product, Pagination, ApiResponse, ProductVariant, Segment, Category, CartState, CartItem, HomeSection, IButton };

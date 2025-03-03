@@ -65,12 +65,12 @@ export default function SubcategoryClient({subCategory, products}: {subCategory?
         {/* Empty State */}
         {products.length === 0 && (
           <div className="text-center py-16">
-            <h2 className="text-2xl font-semibold mb-2">Aucune collection trouvée</h2>
+            <h2 className="text-2xl font-semibold mb-2">Aucune produit trouvé</h2>
             <p className="text-muted-foreground mb-6">
-              Aucune collection ne correspond à votre filtre actuel.
+              Aucun produit ne correspond à votre filtre actuel.
             </p>
             <Button onClick={() => setFilter('all')}>
-              Voir toutes les collections
+              Voir toutes les produits
             </Button>
           </div>
         )}

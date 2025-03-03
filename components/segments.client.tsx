@@ -38,7 +38,7 @@ export const Segments = ({segments}: {segments: Segment[]}) => {
               animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
             >
-              <Link href={`/segments/${category.slug}`} className="block group">
+              <Link href={`/products/${category.slug}`} className="block group">
                 <div className="relative overflow-hidden rounded-lg aspect-square">
                   <Image
                     src={`${process.env.NEXT_PUBLIC_STRAPI_API_URL}${category.image?.formats?.small?.url ?? ''}`}
