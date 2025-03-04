@@ -203,4 +203,14 @@ interface ICollection {
     products: Product[];
 }
 
-export type { ISize, IColor, ICollection, SubCategory, ImageFormats, Image, Product, Pagination, ApiResponse, ProductVariant, Segment, Category, CartState, CartItem, HomeSection, IButton };
+interface IArticle {
+    id: number;
+    documentId: string;
+    createdAt: string;
+    category: Segment;
+    title: string;
+    content: string;
+    excerpt: string;
+}
+
+export type { IArticle, ISize, IColor, ICollection, SubCategory, ImageFormats, Image, Product, Pagination, ApiResponse, ProductVariant, Segment, Category, CartState, CartItem, HomeSection, IButton };

@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import PyiursLogo from '@/app/components/ui/PyiursLogo';
-import {Segment} from "@/app/types/types";
+import { Segment } from "@/app/types/types";
 
 interface HeaderClientProps {
   mainCategories: Segment[];
@@ -62,8 +62,10 @@ const HeaderClient = ({ mainCategories }: HeaderClientProps) => {
           )}
       >
         <div className="container mx-auto md:px-24 px-4">
-          <div className="flex items-center justify-between">
-            <PyiursLogo />
+          <div className="flex items-center md:justify-between">
+            <div className={'w-[240px]'}>
+              <PyiursLogo />
+            </div>
             <nav className="hidden md:flex space-x-8">
               <Link href="/" className={cn('font-medium hover:text-primary transition-colors', currentRoute === '/' ? 'text-primary underline' : '')}>Accueil</Link>
               <Link href="/collections" className={cn('font-medium hover:text-primary transition-colors', currentRoute === '/collections' ? 'text-primary underline' : '')}>Collections</Link>
@@ -213,79 +215,82 @@ const HeaderClient = ({ mainCategories }: HeaderClientProps) => {
 
                   {/* Menu Mobile Catégories */}
                   <div>
-                    {/* Bouton de retour unique */}
-                    {(mobileCategory === 'categories' || mobileSubCategory !== null || mobileSubSubCategory !== null) && (
-                        <Button variant="ghost" className="w-full justify-between" onClick={handleMobileBack}>
-                          <ChevronLeft className="h-4 w-4" /> Retour
-                        </Button>
-                    )}
-
                     {mobileCategory === null ? (
                         <>
-                          <Button variant="ghost" className="w-full justify-between" onClick={() => setMobileCategory('categories')}>
+                          <div className="w-full justify-between flex " onClick={() => setMobileCategory('categories')}>
                             Catégories <ChevronRight className="h-4 w-4" />
-                          </Button>
+                          </div>
                         </>
                     ) : (
-                        mobileCategory === 'categories' && mobileSubCategory === null ? (
-                            <>
-                              {mainCategories.map((mainCategory) => (
-                                  <Button
-                                      key={mainCategory.id}
-                                      variant="ghost"
-                                      className="w-full justify-between ml-4"
-                                      onClick={() => setMobileSubCategory(mainCategory.id)}
-                                  >
-                                    {mainCategory.name} <ChevronRight className="h-4 w-4" />
-                                  </Button>
-                              ))}
-                            </>
-                        ) : (
-                            mainCategories.map(mainCategory => (
-                                mainCategory.id === mobileSubCategory && (
-                                    <div key={mainCategory.id} className="ml-4">
-                                      {mainCategory.categories.map(category => (
-                                          mobileSubSubCategory === null ? (
-                                              <Button
-                                                  key={category.id}
-                                                  variant="ghost"
-                                                  className="w-full justify-between ml-4"
-                                                  onClick={() => setMobileSubSubCategory(category.id)}
-                                              >
-                                                {category.name} <ChevronRight className="h-4 w-4" />
-                                              </Button>
-                                          ) : (
-                                              mainCategory.categories.map(cat => (
-                                                  cat.id === mobileSubSubCategory && (
-                                                      <div key={cat.id}>
-                                                        {cat.sub_categories.map(subCategory => (
-                                                            <Link
-                                                                key={subCategory.id}
-                                                                href={`/products/${mainCategory.slug}/${cat.slug}/${subCategory.slug}`}
-                                                                className="block py-2 px-4 hover:text-primary transition-colors ml-12"
-                                                                onClick={toggleMobileMenu}
-                                                            >
-                                                              {subCategory.name}
-                                                            </Link>
-                                                        ))}
-                                                      </div>
-                                                  )
-                                              ))
-                                          )
-                                      ))}
-                                    </div>
-                                )
-                            ))
-                        )
+                        <>
+                          <Button variant="ghost" className="w-full justify-between" onClick={handleMobileBack}>
+                            <ChevronLeft className="h-4 w-4" /> Retour
+                          </Button>
+                          {mainCategories.map((mainCategory) => (
+                              <div key={mainCategory.id}>
+                                {mobileSubCategory === null ? (
+                                    <Button
+                                        variant="ghost"
+                                        className="w-full justify-between ml-4"
+                                        onClick={() => setMobileSubCategory(mainCategory.id)}
+                                    >
+                                      {mainCategory.name} <ChevronRight className="h-4 w-4" />
+                                    </Button>
+                                ) : (
+                                    mainCategory.id === mobileSubCategory && (
+                                        <>
+                                          <div key={mainCategory.id} className="ml-4">
+                                            {mainCategory.categories.map((category) => (
+                                                <div key={category.id}>
+                                                  {mobileSubSubCategory === null ? (
+                                                      <Button
+                                                          variant="ghost"
+                                                          className="w-full justify-between ml-8"
+                                                          onClick={() => setMobileSubSubCategory(category.id)}
+                                                      >
+                                                        {category.name} <ChevronRight className="h-4 w-4" />
+                                                      </Button>
+                                                  ) : (
+                                                      mobileSubSubCategory === category.id && (
+                                                          <div key={category.id}>
+                                                            {category.sub_categories.map((subCategory) => (
+                                                                <Link
+                                                                    key={subCategory.id}
+                                                                    href={`/products/${mainCategory.slug}/${category.slug}/${subCategory.slug}`}
+                                                                    className="block py-2 px-4 hover:text-primary transition-colors ml-12"
+                                                                    onClick={toggleMobileMenu}
+                                                                >
+                                                                  {subCategory.name}
+                                                                </Link>
+                                                            ))}
+                                                          </div>
+                                                      )
+                                                  )}
+                                                </div>
+                                            ))}
+                                          </div>
+                                        </>
+                                    )
+                                )}
+                              </div>
+                          ))}
+                        </>
                     )}
                   </div>
 
                   <Link
-                      href="/"
-                      className={cn('font-medium py-2 hover:text-primary transition-colors', currentRoute === '/' ? 'text-primary' : '')}
+                      href="/about"
+                      className={cn('font-medium py-2 hover:text-primary transition-colors', currentRoute === '/about' ? 'text-primary' : '')}
                       onClick={toggleMobileMenu}
                   >
                     À propos
+                  </Link>
+                  <Link
+                      href="/blog"
+                      className={cn('font-medium py-2 hover:text-primary transition-colors', currentRoute === '/about' ? 'text-primary' : '')}
+                      onClick={toggleMobileMenu}
+                  >
+                    Blog
                   </Link>
                   <Link
                       href="/contact"

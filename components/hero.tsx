@@ -40,7 +40,7 @@ export const Hero = ({ blocks }: { blocks: HomeSection[] }) => {
             />
             <div className="absolute inset-0 bg-black/30" />
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="container mx-auto px-24">
+              <div className="container mx-auto px-8 md:px-24">
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ 

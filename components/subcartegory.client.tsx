@@ -13,7 +13,7 @@ export default function SubcategoryClient({subCategory, products}: {subCategory?
 
   return (
     <div className="pt-24 pb-16">
-      <div className="container mx-auto px-24">
+      <div className="container mx-auto md:px-24 px-8">
         {/* Breadcrumb */}
         <div className="flex items-center text-sm text-muted-foreground mb-8">
           <Link href="/" className="hover:text-foreground transition-colors">

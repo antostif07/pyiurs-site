@@ -49,7 +49,7 @@ export default function Menu({open, setOpenAction}: {open: 'isOpen' | 'isClosed'
         return () => {
             setOpenAction('isClosed')
         }
-    }, [])
+    }, [setOpenAction])
     
 
     useEffect(() => {

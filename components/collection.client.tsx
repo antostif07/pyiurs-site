@@ -33,7 +33,7 @@ export const CollectionsPage = ({collections}: {collections: ICollection[]}) => 
 
     return (
         <div className="pt-24 pb-16">
-            <div className="container mx-auto px-24">
+            <div className="container mx-auto md:px-24 px-8">
         
             <div className="flex items-center text-sm text-muted-foreground mb-8">
                 <Link href="/" className="hover:text-foreground transition-colors">
@@ -54,8 +54,8 @@ export const CollectionsPage = ({collections}: {collections: ICollection[]}) => 
             />
             <div className="absolute inset-0 bg-black/40" />
             <div className="absolute inset-0 flex flex-col justify-center p-8 md:p-16">
-              <h1 className="text-3xl md:text-5xl font-bold text-white mb-4">Nos Collections</h1>
-              <p className="text-white/90 text-lg md:text-xl max-w-2xl mb-6">
+              <h1 className="text-2xl md:text-5xl font-bold text-white mb-4">Nos Collections</h1>
+              <p className="text-white/90 text-xs md:text-xl max-w-2xl mb-6">
                 Découvrez nos collections soigneusement élaborées pour chaque saison et occasion.
                 Des pièces élégantes et intemporelles qui reflètent votre style unique.
               </p>

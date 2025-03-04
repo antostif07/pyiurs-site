@@ -1,19 +1,17 @@
 'use client';
 
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button"; // Assurez-vous que le chemin est correct
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 import { Category, SubCategory, ISize, IColor } from "@/app/types/types"; // Définir les types
 import { ScrollArea } from "@/components/ui/scroll-area"
 
-// Définir les types pour les props
 interface FilterProps {
   categories: Category[];
   subCategories: SubCategory[];
   sizes: ISize[];
   colors: IColor[];
-  onFilterChange: (filters: any) => void; // Définir le type de 'filters'
+  onFilterChange: (filters: { sizes: number[]; categories: number[]; subCategories: number[]; colors: number[] }) => void; // Définir le type de 'filters'
 }
 
 const FilterDrawerContent: React.FC<FilterProps> = ({
@@ -155,13 +153,13 @@ interface Props {
   subCategories: SubCategory[];
   sizes: ISize[];
   colors: IColor[];
-  onFilterChange: (filters: any) => void;
+  onFilterChange: (filters: { sizes: number[]; categories: number[]; subCategories: number[]; colors: number[] }) => void;
 }
 
 const FilterButton: React.FC<Props> = ({ categories, subCategories, sizes, colors, onFilterChange }) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleFilterChange = (filters: any) => {
+  const handleFilterChange = (filters: { sizes: number[]; categories: number[]; subCategories: number[]; colors: number[] }) => {
     onFilterChange(filters);
     setIsOpen(false); // Close the drawer after filtering
   };

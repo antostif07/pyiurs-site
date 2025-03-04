@@ -16,7 +16,7 @@ export const Segments = ({segments}: {segments: Segment[]}) => {
 
   return (
     <section className="py-20">
-      <div className="container mx-auto px-24">
+      <div className="container mx-auto md:px-24 px-8">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Nos Rayons</h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">

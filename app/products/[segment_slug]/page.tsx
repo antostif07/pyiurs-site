@@ -1,12 +1,10 @@
 import React from 'react';
 import {getProducts, getSegment} from '@/lib/api';
 // import CategoryFilter from "@/app/components/CategoryFilter";
-import PageHeroSection from "@/app/components/segments/PageHeroSection";
 import ProductGrid from '@/components/product-grid';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ChevronRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 
 interface Props {
     params: Promise<{ segment_slug: string }>,

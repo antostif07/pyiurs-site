@@ -14,7 +14,7 @@ export const Collection = () => {
 
   return (
     <section className="py-20 overflow-hidden">
-      <div className="container mx-auto px-24">
+      <div className="container mx-auto px-8 md:px-24">
         <motion.div
           ref={ref}
           initial={{ opacity: 0 }}

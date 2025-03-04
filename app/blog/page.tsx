@@ -5,13 +5,11 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
-import { ChevronRight, Search, Calendar, User, Tag, ArrowRight } from 'lucide-react';
+import { ChevronRight, Search, Calendar, User, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 
-// Données des articles de blog
 const blogPosts = [
   {
     id: "tendances-printemps-2025",
@@ -231,7 +229,7 @@ export default function BlogPage() {
                     {post.excerpt}
                   </p>
                   <div className="flex items-center text-primary font-medium">
-                    <span>Lire l'article</span>
+                    <span>{`Lire l'article`}</span>
                     <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </div>
                 </Link>
@@ -370,7 +368,7 @@ export default function BlogPage() {
                       </p>
                       
                       <div className="flex items-center text-primary font-medium">
-                        <span>Lire l'article</span>
+                        <span>{`Lire l'article`}</span>
                         <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                       </div>
                     </Link>

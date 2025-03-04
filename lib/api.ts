@@ -1,4 +1,4 @@
-import {Category, HomeSection, ICollection, Product, Segment, SubCategory} from "@/app/types/types";
+import {Category, HomeSection, IArticle, ICollection, Product, Segment, SubCategory} from "@/app/types/types";
 
 const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_API_URL;
 
@@ -114,6 +114,27 @@ export async function getCategories({segment, slug}: {segment?: string, slug?: s
     const segmentFilter = segment ? `&filters[segments][slug][$eq]=${segment}` : '';
     const slugFilter = slug ? `&filters[slug][$eq]=${slug}` : '';
     const filter = `${segmentFilter}${slugFilter}`;
+
+    const res = await fetch(`${apiUrl}${filter}`, { next: { revalidate: 60 } });
+
+    if (!res.ok) {
+        throw new Error(`Failed to fetch categories: ${res.status}`);
+    }
+
+    const data = await res.json();
+
+    if (data) {
+        return data.data;
+    } else {
+        console.error("Invalid categories data structure:", data);
+        return [];
+    }
+}
+
+export async function getArticles({slug}: {slug?: string}): Promise<IArticle[]> {
+    const apiUrl = `${STRAPI_URL}/api/articles?populate=*`;
+    const slugFilter = slug ? `&filters[slug][$eq]=${slug}` : '';
+    const filter = `${slugFilter}`;
 
     const res = await fetch(`${apiUrl}${filter}`, { next: { revalidate: 60 } });
 
