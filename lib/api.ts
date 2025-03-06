@@ -4,7 +4,12 @@ const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_API_URL;
 
 
 export async function getHeroSection(): Promise<HomeSection[]> {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_STRAPI_API_URL}/api/home-section?populate[HomeSections][populate]=cover&populate[HomeSections][populate]=Button`, );
+    const res = await fetch(
+        `${process.env.NEXT_PUBLIC_STRAPI_API_URL}/api/home-section?populate[HomeSections][populate]=cover&populate[HomeSections][populate]=Button`,
+        {
+            next: { revalidate: 60 },
+        }
+    );
 
     if (!res.ok) {
         throw new Error(`Failed to fetch segments: ${res.status}`);
@@ -74,7 +79,7 @@ export async function getProducts({segment, slug, limit, subCategory,} : {segmen
 
     const url = `${apiUrl}${filter}`;
 
-    const res = await fetch(url);
+    const res = await fetch(url, { next: { revalidate: 60 } });
 
     if (!res.ok) {
         throw new Error(`Failed to fetch products: ${res.status}`);

@@ -73,7 +73,7 @@ export default function ProductGrid({ products }: { products: Product[] }) {
             onMouseEnter={() => setHoveredProduct(product.id)}
             onMouseLeave={() => setHoveredProduct(null)}
           >
-            <Link href={`/products/${product.segment.slug}/${product.category.slug}/${product.slug}`} passHref>
+            <Link href={`/products/${product.segment.slug}/${product.category.slug}/${product.sub_category.slug}/${product.slug}`} passHref>
               <div className="relative aspect-[3/4] overflow-hidden cursor-pointer">
                 <Image
                   src={getProductImage(product)}
