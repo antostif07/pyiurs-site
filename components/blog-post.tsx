@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import {Button} from "@/components/ui/button";
-import {IArticle} from "@/app/types/types";
 import {useState} from "react";
 import {useInView} from "react-intersection-observer";
 import {
@@ -17,6 +16,7 @@ import {
 import {motion} from "framer-motion";
 import {Badge} from "@/components/ui/badge";
 import {Input} from "@/components/ui/input";
+import {IArticle} from "@/types/types";
 
 export default function BlogPost({post}: {post: IArticle}) {
     const [, setCopied] = useState(false);

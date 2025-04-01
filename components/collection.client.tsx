@@ -3,10 +3,10 @@ import { useState, } from "react";
 import { Button } from "@/components/ui/button";
 import { motion, } from "framer-motion";
 import { useInView } from 'react-intersection-observer';
-import { ICollection } from "@/app/types/types";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, ChevronRight } from "lucide-react";
+import {ICollection} from "@/types/types";
 
 export const CollectionsPage = ({collections}: {collections: ICollection[]}) => {
     const [filter, setFilter] = useState('all'); // 'all', 'new', 'featured'

@@ -1,7 +1,7 @@
 // store/cartStore.ts
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import {CartItem, CartState} from "@/app/types/types";
+import {CartItem, CartState} from "@/types/types";
 
 
 const useCartStore = create<CartState>()(

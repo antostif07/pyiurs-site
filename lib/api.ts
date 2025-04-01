@@ -1,4 +1,4 @@
-import {Category, HomeSection, IArticle, ICollection, Product, Segment, SubCategory} from "@/app/types/types";
+import {Category, HomeSection, IArticle, ICollection, Product, Segment, SubCategory} from "@/types/types"
 
 const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_API_URL;
 
@@ -26,7 +26,14 @@ export async function getHeroSection(): Promise<HomeSection[]> {
 }
 
 export async function getSegments(): Promise<Segment[]> {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_STRAPI_API_URL}/api/segments?populate=categories&populate=categories.sub_categories&populate=image`);
+    const res = await fetch(
+        `${process.env.NEXT_PUBLIC_STRAPI_API_URL}/api/segments?populate=categories&populate=categories.sub_categories&populate=image`,
+        {
+            next: {
+                revalidate: 60,
+            }
+        }
+    );
 
     if (!res.ok) {
         throw new Error(`Failed to fetch segments: ${res.status}`);
@@ -68,14 +75,15 @@ export async function getCollections(): Promise<ICollection[]> {
     }
 }
 
-export async function getProducts({segment, slug, limit, subCategory,} : {segment?: string, slug?: string, limit?: number, subCategory?: string}): Promise<Product[]> {
+export async function getProducts({segment, slug, limit, subCategory, reference} : {segment?: string, slug?: string, limit?: number, subCategory?: string, reference?: string}): Promise<Product[]> {
     const apiUrl = `${STRAPI_URL}/api/products?populate=sub_category&populate=image&populate=segment&populate=category&populate=variants.image&populate=variants.sizes&populate=variants.color&sort=id:desc`;
     const segmentFilter = segment ? `&filters[segment][slug][$eq]=${segment}` : '';
     const slugFilter = slug ? `&filters[slug][$eq]=${slug}` : '';
     const subCategorySlug = subCategory ? `&filters[sub_category][slug][$eq]=${subCategory}` : '';
     const limitFilter = limit ? `&pagination[limit]=${limit}` : '';
+    const referenceFilter = reference ? `&filters[reference][$eq]=${reference}` : '';
 
-    const filter = `${segmentFilter}${slugFilter}${limitFilter}${subCategorySlug}`;
+    const filter = `${segmentFilter}${slugFilter}${limitFilter}${subCategorySlug}${referenceFilter}`;
 
     const url = `${apiUrl}${filter}`;
 

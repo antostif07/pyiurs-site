@@ -1,5 +1,5 @@
 'use client'
-import { Product, ProductVariant } from "@/app/types/types";
+import { Product, ProductVariant } from "@/types/types";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { useInView } from 'react-intersection-observer';
@@ -55,7 +55,10 @@ export default function ProductGrid({ products }: { products: Product[] }) {
   };
 
   const getProductImage = (product: Product) => {
-    return selectedVariantImages[product.id] || `${process.env.NEXT_PUBLIC_STRAPI_API_URL}${product.variants[0]?.image?.[0]?.formats?.medium?.url ?? '/fallback-image-url.jpg'}`;
+    if (product.variants.length < 1) {
+      return '/fallback.jpg'
+    }
+    return selectedVariantImages[product.id] || `${process.env.NEXT_PUBLIC_STRAPI_API_URL}${product.variants[0]?.image?.[0]?.url}`;
   };
 
   return (
@@ -73,7 +76,7 @@ export default function ProductGrid({ products }: { products: Product[] }) {
             onMouseEnter={() => setHoveredProduct(product.id)}
             onMouseLeave={() => setHoveredProduct(null)}
           >
-            <Link href={`/products/${product.segment.slug}/${product.category.slug}/${product.sub_category.slug}/${product.slug}`} passHref>
+            <Link href={`/products/${product.segment?.slug}/${product.category?.slug}/${product.sub_category?.slug}/${product.slug}`} passHref>
               <div className="relative aspect-[3/4] overflow-hidden cursor-pointer">
                 <Image
                   src={getProductImage(product)}
@@ -94,7 +97,7 @@ export default function ProductGrid({ products }: { products: Product[] }) {
             <CardContent className="p-4 flex justify-between">
               <div>
                 <div className="flex items-center text-sm text-muted-foreground mb-2">
-                  <span>{product.category.name}</span>
+                  <span>{product.category?.name}</span>
                   <span className="mx-2">•</span>
                   <div className="flex items-center">
                     <Star className="h-3 w-3 fill-current text-yellow-500 mr-1" />
@@ -121,18 +124,20 @@ export default function ProductGrid({ products }: { products: Product[] }) {
               <div className="flex justify-between items-center mb-2">
                 <div className="flex flex-col items-center space-y-2">
                   {product.variants.map((variant) => (
-                    <Button
-                      key={variant.id}
-                      variant="outline"
-                      size="sm"
-                      className="h-8 px-2 bg-white/20"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleColorClick(product.id, variant);
-                      }}
-                    >
-                      {variant.color.name}
-                    </Button>
+                    variant.color ? (
+                        <Button
+                            key={variant.id}
+                            variant="outline"
+                            size="sm"
+                            className="h-8 px-2 bg-white/20"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleColorClick(product.id, variant);
+                            }}
+                        >
+                          {variant.color?.name}
+                        </Button>
+                    ) : ""
                   ))}
                 </div>
               </div>

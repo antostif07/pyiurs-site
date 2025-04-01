@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { Button } from '@/components/ui/button';
 import { ChevronRight } from 'lucide-react';
-import { Segment } from '@/app/types/types';
+import {Segment} from "@/types/types";
 
 export const Segments = ({segments}: {segments: Segment[]}) => {
   const { ref, inView } = useInView({

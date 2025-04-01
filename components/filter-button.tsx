@@ -3,8 +3,8 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button"; // Assurez-vous que le chemin est correct
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
-import { Category, SubCategory, ISize, IColor } from "@/app/types/types"; // Définir les types
 import { ScrollArea } from "@/components/ui/scroll-area"
+import {Category, IColor, ISize, SubCategory} from "@/types/types";
 
 interface FilterProps {
   categories: Category[];

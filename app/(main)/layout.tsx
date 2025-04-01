@@ -1,10 +1,8 @@
-import { Inter,} from 'next/font/google';
-import './globals.css'; // Make sure this path is correct
+import '../globals.css'; // Make sure this path is correct
 import { ReactNode } from 'react';
-import {Toaster} from "@/components/ui/sonner";
+import Footer from '@/components/footer';
+import Header from "@/components/header";
 import {Metadata, Viewport} from "next/types";
-
-const inter = Inter({ subsets: ['latin'] });
 
 export const viewport: Viewport = {
     width: 'device-width',
@@ -19,13 +17,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children, }: { children: ReactNode }) {
   return (
-      <html lang="fr">
-      <body
-          className={`relative ${inter.className}`}
-      >
-        {children}
-      <Toaster />
-      </body>
-      </html>
+      <>
+        <Header />
+        <div>{children}</div>
+        <Footer />
+      </>
   );
 }

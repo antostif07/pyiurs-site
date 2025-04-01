@@ -8,8 +8,8 @@ import { ShoppingBag, Search, Menu, X, ChevronRight, ChevronLeft } from 'lucide-
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import PyiursLogo from '@/app/components/ui/PyiursLogo';
-import { Segment } from "@/app/types/types";
+import {Segment} from "@/types/types";
+import PyiursLogo from "@/app/(main)/components/ui/PyiursLogo";
 
 interface HeaderClientProps {
   mainCategories: Segment[];

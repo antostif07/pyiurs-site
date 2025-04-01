@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { ChevronRight } from 'lucide-react';
-import { HomeSection } from '@/app/types/types'; 
+import {HomeSection} from "@/types/types";
 
 export const Hero = ({ blocks }: { blocks: HomeSection[] }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
