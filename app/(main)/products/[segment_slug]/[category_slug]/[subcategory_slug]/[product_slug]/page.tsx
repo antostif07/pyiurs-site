@@ -10,7 +10,7 @@ export default async function ProductDetail(
 
     return (
         <ProductDetailsClient 
-        product={products[0]}
+            product={products[0]}
         />
     );
 }

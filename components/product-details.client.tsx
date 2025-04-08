@@ -1,135 +1,95 @@
 "use client";
 
-import { useState, 
-  // useMemo, 
-  useCallback } from 'react';
-// import Image from 'next/image';
+import React, { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
-import {
-  ChevronRight,
-  Star,
-  Truck,
-  RefreshCw,
-  ShieldCheck,
-  Heart,
-  Share2,
-  Minus,
-  // Plus,
-  // ShoppingCart,
-  // Check
-} from 'lucide-react';
+import {ChevronRight, Star, Heart, Share2, ShoppingCart,} from 'lucide-react';
 import { Button } from '@/components/ui/button';
-// import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,} from "@/components/ui/sheet";
 import { toast } from 'sonner';
-// import FeaturedProducts from '@/components/featured-products';
-import {Product} from "@/types/types";
+import {Product, ProductVariant} from "@/types/types";
+import Image from 'next/image'
+import useCartStore from "@/store/cart";
 
-// Composant ColorButton pour la sélection de couleur
-// interface ColorButtonProps {
-//   color: { name: string; value: string; selected: boolean };
-//   index: number;
-//   selectedColor: number;
-//   setSelectedColor: (index: number) => void;
-// }
+interface ColorButtonProps {
+  color: string; // The color of the button (e.g., "red", "#FF0000", "rgb(255, 0, 0)")
+  onClick?: () => void; // Function to execute when the button is clicked (optional)
+  className?: string; // Additional CSS classes (optional)
+}
 
-// function ColorButton({ color, index, selectedColor, setSelectedColor }: ColorButtonProps) {
-//   const handleClick = useCallback(() => {
-//     setSelectedColor(index);
-//   }, [index, setSelectedColor]);
+interface SizeButtonProps {
+  size: string; // The size of the button (e.g., "S", "M", "L", "XL")
+  selectedSize: string; // The currently selected size
+  setSelectedSize: (size: string) => void; // Function to set the selected size
+  onClick?: () => void; // Function to execute when the button is clicked (optional)
+  className?: string; // Additional CSS classes (optional)
+}
 
-//   const isSelected = selectedColor === index;
+const SizeButton: React.FC<SizeButtonProps> = ({ size, selectedSize, setSelectedSize, onClick, className }) => {
+  // Determine if the current size is selected
+  const isSelected = size === selectedSize;
 
-//   return (
-//       <button
-//           key={index}
-//           onClick={handleClick}
-//           className={`w-12 h-12 rounded-full flex items-center justify-center ${isSelected ? 'ring-2 ring-primary ring-offset-2' : ''
-//           }`}
-//           style={{ backgroundColor: color.value }}
-//           aria-label={`Couleur ${color.name}`}
-//       >
-//         {isSelected && (
-//             <div className="w-6 h-6 rounded-full bg-white/30 flex items-center justify-center">
-//               <Check className="text-white" />
-//             </div>
-//         )}
-//       </button>
-//   );
-// }
+  return (
+      <button
+          onClick={() => {
+            if (onClick) {
+              onClick(); // Execute the provided onClick function
+            }
+            setSelectedSize(size); // Set the selected size
+          }}
+          className={`
+        px-4
+        py-2
+        rounded-md
+        border
+        border-gray-300
+        focus:outline-none
+        focus:ring-2
+        focus:ring-offset-2
+        focus:ring-blue-500
+        transition-colors
+        duration-200
+        ${className || ''}
+        ${isSelected ? 'bg-blue-500 text-white border-blue-500' : 'bg-white text-gray-700'}
+      `}
+      >
+        {size}
+      </button>
+  );
+};
+const ColorButton: React.FC<ColorButtonProps> = ({ color, onClick, className, }) => {
+  const buttonStyle = {
+    backgroundColor: color,
+  };
 
-// Composant SizeButton pour la sélection de taille
-// interface SizeButtonProps {
-//   size: { name: string; available: boolean; selected: boolean };
-//   index: number;
-//   selectedSize: number;
-//   setSelectedSize: (index: number) => void;
-// }
-
-// function SizeButton({ size, index, selectedSize, setSelectedSize }: SizeButtonProps) {
-//   const handleClick = useCallback(() => {
-//     if (size.available) {
-//       setSelectedSize(index);
-//     }
-//   }, [index, size.available, setSelectedSize]);
-
-//   const isSelected = selectedSize === index;
-
-//   return (
-//       <button
-//           key={index}
-//           onClick={handleClick}
-//           disabled={!size.available}
-//           className={`h-12 min-w-[3rem] px-4 rounded-lg border font-medium transition-colors ${!size.available
-//               ? 'bg-muted/50 text-muted-foreground cursor-not-allowed border-muted'
-//               : isSelected
-//                   ? 'bg-primary text-primary-foreground border-primary'
-//                   : 'bg-background hover:border-primary border-input'
-//           }`}
-//       >
-//         {size.name}
-//       </button>
-//   );
-// }
+  return (
+      <button
+          style={buttonStyle}
+          onClick={onClick}
+          className={`
+        rounded-full h-8 w-8 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors
+        duration-200
+        ${className || ''}
+      `}
+          aria-label={`Color ${color}`}
+      />
+  );
+}
 
 export default function ProductPage({product}: {product: Product}) {
-  const [quantity, setQuantity] = useState(1);
-  // const [selectedImage, setSelectedImage] = useState(0);
+  const [selectedVariant, setSelectedVariant] = useState<ProductVariant|undefined>(product.variants[0]);
   const [isShareSheetOpen, setIsShareSheetOpen] = useState(false);
+  const [selectedSize, setSelectedSize] = useState("")
+  const [selectedImage, setSelectedImage] = useState(selectedVariant?.image[0])
+  const cart = useCartStore()
 
   const { ref, inView } = useInView({
     triggerOnce: true,
     threshold: 0.1,
   });
-
-  // Use useCallback pour éviter de recréer les fonctions à chaque rendu
-  const decreaseQuantity = useCallback(() => {
-    if (quantity > 1) {
-      setQuantity(prevQuantity => prevQuantity - 1);
-    }
-  }, [quantity]);
-
-  // const increaseQuantity = useCallback(() => {
-  //   if (quantity < product.stock) {
-  //     setQuantity(prevQuantity => prevQuantity + 1);
-  //   }
-  // }, [quantity, product.stock]);
-
-  // const addToCart = useCallback(() => {
-  //   toast("Produit ajouté au panier", {
-  //     description: `${quantity} × ${product.name} (${product.colors[selectedColor].name}, ${product.sizes[selectedSize].name})`,
-  //   });
-  // }, [quantity, product.name, selectedColor, selectedSize]);
 
   const addToWishlist = useCallback(() => {
     toast("Produit ajouté aux favoris", {
@@ -137,9 +97,27 @@ export default function ProductPage({product}: {product: Product}) {
     });
   }, [product.name]);
 
+  const addToCart = useCallback(() => {
+    cart.addToCart({
+      image: {
+        url: `${process.env.NEXT_PUBLIC_STRAPI_URL}${selectedImage?.url}`
+      },
+      name: product.name,
+      price: product.price,
+      id: product.documentId,
+      quantity: 1,
+      color: selectedVariant?.color,
+      size: selectedSize
+    })
+
+    toast("Produit ajouté aux favoris", {
+      description: `${product.name} a été ajouté à votre liste de souhaits.`,
+    });
+  }, [product.name, cart, product.documentId, product.price, selectedImage?.url, selectedSize, selectedVariant?.color]);
+
   const shareProduct = useCallback(async (platform: string) => {
     const url = window.location.href;
-    const text = `Découvrez ${product.name} sur Élégance`;
+    const text = `Découvrez ${product.name} chez Pyiurs`;
 
     switch (platform) {
       case 'facebook':
@@ -170,21 +148,9 @@ export default function ProductPage({product}: {product: Product}) {
     setIsShareSheetOpen(false);
   }, [product.name]); // Ajout de product.name comme dépendance
 
-  //Memoized values
-  // const discountPercentage = useMemo(() => {
-  //   if (product.originalPrice) {
-  //     return Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100);
-  //   }
-  //   return 0;
-  // }, [product.originalPrice, product.price]);
-
-  // const isSizeAvailable = useMemo(() => {
-  //   return product.sizes[selectedSize].available;
-  // }, [selectedSize, product.sizes]);
-
   return (
       <div className="pt-24 pb-16">
-        <div className="ontainer mx-auto md:px-24 px-8">
+        <div className="container mx-auto md:px-24 px-8">
           {/* Breadcrumb */}
           <div className="flex items-center text-sm text-muted-foreground mb-6 overflow-x-auto whitespace-nowrap pb-2">
             <Link href="/" className="hover:text-foreground transition-colors">
@@ -207,7 +173,7 @@ export default function ProductPage({product}: {product: Product}) {
               initial={{ opacity: 0 }}
               animate={inView ? { opacity: 1 } : { opacity: 0 }}
               transition={{ duration: 0.5 }}
-              className="grid grid-cols-1 lg:grid-cols-2 gap-8"
+              className="grid grid-cols-1 lg:grid-cols-2 gap-32"
           >
             {/* Product Images */}
             <motion.div
@@ -217,13 +183,12 @@ export default function ProductPage({product}: {product: Product}) {
                 className="space-y-4"
             >
               <div className="relative aspect-[4/5] sm:aspect-[4/5] rounded-lg overflow-hidden">
-                {/*<Image*/}
-                {/*    src={product.images[selectedImage]}*/}
-                {/*    alt={product.name}*/}
-                {/*    fill*/}
-                {/*    className="object-cover"*/}
-                {/*    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" // Optimisation de l'image*/}
-                {/*/>*/}
+                <Image
+                    src={selectedImage ? `${process.env.NEXT_PUBLIC_STRAPI_API_URL}${selectedImage.url}` : ''}
+                    alt={product.name} width={selectedImage?.width} height={selectedImage?.height}
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" // Optimisation de l'image
+                />
                 <div className="absolute top-4 left-4 flex flex-col gap-2">
                   {/*{product.isNew && (*/}
                   {/*    <Badge className="bg-primary text-primary-foreground">Nouveau</Badge>*/}
@@ -233,24 +198,24 @@ export default function ProductPage({product}: {product: Product}) {
                   {/*)}*/}
                 </div>
               </div>
-              {/*<div className="grid grid-cols-4 gap-2 sm:gap-4">*/}
-              {/*  {product.images.map((image, index) => (*/}
-              {/*      <button*/}
-              {/*          key={index}*/}
-              {/*          onClick={() => setSelectedImage(index)}*/}
-              {/*          className={`relative aspect-square rounded-md overflow-hidden border-2 transition-all ${selectedImage === index ? 'border-primary' : 'border-transparent'*/}
-              {/*          }`}*/}
-              {/*      >*/}
-              {/*        <Image*/}
-              {/*            src={image}*/}
-              {/*            alt={`${product.name} - Vue ${index + 1}`}*/}
-              {/*            fill*/}
-              {/*            className="object-cover"*/}
-              {/*            sizes="100px" // Taille fixe pour les miniatures*/}
-              {/*        />*/}
-              {/*      </button>*/}
-              {/*  ))}*/}
-              {/*</div>*/}
+              <div className="grid grid-cols-4 gap-2 sm:gap-4">
+                {selectedVariant?.image.map((img, index) => (
+                    <button
+                        key={index}
+                        onClick={() => setSelectedImage(img)}
+                        className={`relative aspect-square rounded-md overflow-hidden border-2 transition-all ${selectedImage === img ? 'border-primary' : 'border-transparent'
+                        }`}
+                    >
+                      <Image
+                          src={`${process.env.NEXT_PUBLIC_STRAPI_API_URL}${img.url}`}
+                          alt={`${product.name} - Vue ${index + 1}`}
+                          fill
+                          className="object-cover"
+                          sizes="50px" // Taille fixe pour les miniatures
+                      />
+                    </button>
+                ))}
+              </div>
             </motion.div>
 
             {/* Product Info */}
@@ -260,35 +225,35 @@ export default function ProductPage({product}: {product: Product}) {
                 transition={{ duration: 0.5, delay: 0.2 }}
                 className="flex flex-col h-full"
             >
-              {/*<div className="flex items-center text-sm text-muted-foreground mb-2 flex-wrap gap-2">*/}
-              {/*  <span>{product.category}</span>*/}
-              {/*  <span className="mx-2">•</span>*/}
-              {/*  <span>SKU: {product.sku}</span>*/}
-              {/*  <span className="mx-2">•</span>*/}
-              {/*  <div className="flex items-center">*/}
-              {/*    <Star className="h-4 w-4 fill-current text-yellow-500 mr-1" />*/}
-              {/*    <span>{product.rating}</span>*/}
-              {/*    <Link href="#reviews" className="ml-1 underline">*/}
-              {/*      ({product.reviews} avis)*/}
-              {/*    </Link>*/}
-              {/*  </div>*/}
-              {/*</div>*/}
+              <div className="flex items-center text-sm text-muted-foreground mb-2 flex-wrap gap-2">
+                <span>{product.category?.name}</span>
+                <span className="mx-2">•</span>
+                <span>{product.sub_category?.name}</span>
+                {/*<span className="mx-2">•</span>*/}
+                {/*<div className="flex items-center">*/}
+                {/*  <Star className="h-4 w-4 fill-current text-yellow-500 mr-1" />*/}
+                {/*  <span>{product.rating}</span>*/}
+                {/*  <Link href="#reviews" className="ml-1 underline">*/}
+                {/*    ({product.reviews} avis)*/}
+                {/*  </Link>*/}
+                {/*</div>*/}
+              </div>
 
               <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4">{product.name}</h1>
 
-              {/*<div className="flex items-center mb-6 flex-wrap gap-2">*/}
-              {/*  <span className="text-2xl font-bold">{product.price.toFixed(2)} €</span>*/}
-              {/*  {product.originalPrice && (*/}
-              {/*      <span className="ml-3 text-muted-foreground line-through text-lg">*/}
-              {/*                      {product.originalPrice.toFixed(2)} €*/}
-              {/*                  </span>*/}
-              {/*  )}*/}
-              {/*  {product.originalPrice && (*/}
-              {/*      <Badge variant="destructive" className="ml-3">*/}
-              {/*        -{discountPercentage}%*/}
-              {/*      </Badge>*/}
-              {/*  )}*/}
-              {/*</div>*/}
+              <div className="flex items-center mb-6 flex-wrap gap-2">
+                <span className="text-2xl font-bold">{product.price.toFixed(2)} $</span>
+                {/*{product.originalPrice && (*/}
+                {/*    <span className="ml-3 text-muted-foreground line-through text-lg">*/}
+                {/*                    {product.originalPrice.toFixed(2)} €*/}
+                {/*                </span>*/}
+                {/*)}*/}
+                {/*{product.price && (*/}
+                {/*    <Badge variant="destructive" className="ml-3">*/}
+                {/*      -{discountPercentage}%*/}
+                {/*    </Badge>*/}
+                {/*)}*/}
+              </div>
 
               <p className="text-muted-foreground mb-6">
                 {product.description}
@@ -298,21 +263,22 @@ export default function ProductPage({product}: {product: Product}) {
                 {/* Color Selection */}
                 <div>
                   <div className="flex justify-between items-center mb-2">
-                    <span className="font-medium">Couleur</span>
-                    {/*<span className="text-sm text-muted-foreground">*/}
-                    {/*                    {product.colors[selectedColor].name}*/}
-                    {/*                </span>*/}
+                    <span className="font-medium">Couleur:</span>
+                    <span className="text-sm text-muted-foreground">
+                        {selectedVariant?.color?.name}
+                    </span>
                   </div>
                   <div className="flex flex-wrap gap-3">
-                    {/*{product.colors.map((color, index) => (*/}
-                    {/*    <ColorButton*/}
-                    {/*        key={index}*/}
-                    {/*        color={color}*/}
-                    {/*        index={index}*/}
-                    {/*        selectedColor={selectedColor}*/}
-                    {/*        setSelectedColor={setSelectedColor}*/}
-                    {/*    />*/}
-                    {/*))}*/}
+                    {product.variants.map((variant, index) => (
+                        <ColorButton
+                            key={index}
+                            color={variant.color ? variant.color.hex : ""}
+                            onClick={() => {
+                              setSelectedVariant(variant)
+                              setSelectedImage(variant.image[0])
+                            }}
+                        />
+                    ))}
                   </div>
                 </div>
 
@@ -320,68 +286,31 @@ export default function ProductPage({product}: {product: Product}) {
                 <div>
                   <div className="flex justify-between items-center mb-2">
                     <span className="font-medium">Taille</span>
-                    <Link href="#" className="text-sm text-primary underline">
-                      Guide des tailles
-                    </Link>
                   </div>
-                  {/*<div className="flex flex-wrap gap-2">*/}
-                  {/*  {product.sizes.map((size, index) => (*/}
-                  {/*      <SizeButton*/}
-                  {/*          key={index}*/}
-                  {/*          size={size}*/}
-                  {/*          index={index}*/}
-                  {/*          selectedSize={selectedSize}*/}
-                  {/*          setSelectedSize={setSelectedSize}*/}
-                  {/*      />*/}
-                  {/*  ))}*/}
-                  {/*</div>*/}
-                  {/*{!isSizeAvailable && (*/}
-                  {/*    <p className="text-sm text-muted-foreground mt-2">*/}
-                  {/*      {`Cette taille n'est pas disponible actuellement.`}*/}
-                  {/*    </p>*/}
-                  {/*)}*/}
-                </div>
-
-                {/* Quantity */}
-                <div>
-                  <span className="font-medium block mb-2">Quantité</span>
-                  <div className="flex items-center">
-                    <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={decreaseQuantity}
-                        disabled={quantity <= 1}
-                        className="h-12 w-12"
-                    >
-                      <Minus className="h-4 w-4" />
-                    </Button>
-                    <span className="w-16 text-center text-lg">{quantity}</span>
-                    {/*<Button*/}
-                    {/*    variant="outline"*/}
-                    {/*    size="icon"*/}
-                    {/*    onClick={increaseQuantity}*/}
-                    {/*    disabled={quantity >= product.stock}*/}
-                    {/*    className="h-12 w-12"*/}
-                    {/*>*/}
-                    {/*  <Plus className="h-4 w-4" />*/}
-                    {/*</Button>*/}
-                    {/*<span className="ml-4 text-sm text-muted-foreground">*/}
-                    {/*                    {product.stock} disponibles*/}
-                    {/*                </span>*/}
+                  <div className="flex flex-wrap gap-2">
+                      {selectedVariant?.sizes.map((size, index) => (
+                          <SizeButton
+                              key={index}
+                              selectedSize={selectedSize}
+                              setSelectedSize={() => setSelectedSize(size.name)}
+                              size={size.name}
+                              onClick={() => setSelectedSize(size.name)}
+                          />
+                      ))}
                   </div>
                 </div>
               </div>
 
               {/* Actions */}
-              <div className="flex flex-col sm:flex-row gap-4 mb-8">
-                {/*<Button*/}
-                {/*    size="lg"*/}
-                {/*    className="flex-1 gap-2 h-14 text-lg"*/}
-                {/*    onClick={addToCart}*/}
-                {/*>*/}
-                {/*  <ShoppingCart className="h-5 w-5" />*/}
-                {/*  Ajouter au panier*/}
-                {/*</Button>*/}
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Button
+                    size="lg"
+                    className="flex-1 gap-2 h-14 text-lg"
+                    onClick={addToCart}
+                >
+                  <ShoppingCart className="h-5 w-5" />
+                  Ajouter au panier
+                </Button>
                 <div className="flex gap-2">
                   <Button
                       variant="outline"
@@ -435,45 +364,19 @@ export default function ProductPage({product}: {product: Product}) {
                   </Sheet>
                 </div>
               </div>
-
-              {/* Features */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-                <div className="flex items-center bg-muted/30 rounded-lg p-4">
-                  <Truck className="h-5 w-5 mr-3 text-primary flex-shrink-0" />
-                  <span className="text-sm">Livraison gratuite dès 100€</span>
-                </div>
-                <div className="flex items-center bg-muted/30 rounded-lg p-4">
-                  <RefreshCw className="h-5 w-5 mr-3 text-primary flex-shrink-0" />
-                  <span className="text-sm">Retours sous 30 jours</span>
-                </div>
-                <div className="flex items-center bg-muted/30 rounded-lg p-4">
-                  <ShieldCheck className="h-5 w-5 mr-3 text-primary flex-shrink-0" />
-                  <span className="text-sm">Garantie qualité</span>
-                </div>
-              </div>
-
-              {/* Features List */}
-              <div className="mb-8">
-                <h3 className="font-medium mb-2">Caractéristiques</h3>
-                <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                  {/*{product.features.map((feature, index) => (*/}
-                  {/*    <li key={index}>{feature}</li>*/}
-                  {/*))}*/}
-                </ul>
-              </div>
             </motion.div>
           </motion.div>
 
           {/* Product Details Tabs */}
-          <div className="mt-12">
+          <div className="mt-4">
             <Tabs defaultValue="details" className="w-full">
-              <TabsList className="w-full grid grid-cols-3 mb-8">
-                <TabsTrigger value="details" className="text-sm sm:text-base">Détails</TabsTrigger>
-                <TabsTrigger value="care" className="text-sm sm:text-base">Entretien</TabsTrigger>
-                <TabsTrigger value="reviews" className="text-sm sm:text-base">Avis</TabsTrigger>
+              <TabsList className="w-full mb-8">
+                <TabsTrigger value="details" className="w-full text-sm sm:text-base">Détails</TabsTrigger>
+                {/*<TabsTrigger value="care" className="text-sm sm:text-base">Entretien</TabsTrigger>*/}
+                {/*<TabsTrigger value="reviews" className="text-sm sm:text-base">Avis</TabsTrigger>*/}
               </TabsList>
               <TabsContent value="details">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="">
                   <div>
                     <h3 className="text-lg font-medium mb-4">Description</h3>
                     <p className="text-muted-foreground mb-4">
@@ -481,12 +384,6 @@ export default function ProductPage({product}: {product: Product}) {
                     </p>
                     {/*<p className="text-muted-foreground">*/}
                     {/*  {product.details.material}*/}
-                    {/*</p>*/}
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-medium mb-4">Coupe et taille</h3>
-                    {/*<p className="text-muted-foreground">*/}
-                    {/*  {product.details.fit}*/}
                     {/*</p>*/}
                   </div>
                 </div>

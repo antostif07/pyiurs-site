@@ -20,6 +20,13 @@ export default function HomePage() {
         title={"Produits Populaires"}
         subtitle={'Découvrez notre sélection de produits les plus appréciés par nos clientes. Des pièces élégantes et confortables pour toutes les occasions.'}
     />
+    <div className={'bg-red-50'}>
+      <FeaturedProducts
+          segment={'pyiurs-beauty'}
+          title={"Nos Cosmetiques Populaires"}
+          subtitle={'Découvrez notre sélection de produits les plus appréciés par nos clientes. Des pièces élégantes et confortables pour toutes les occasions.'}
+      />
+    </div>
     {/*<HomeCollection />*/}
     <section className="py-16 bg-primary text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">

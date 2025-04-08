@@ -141,11 +141,21 @@ interface CartItem {
     price: number;
     quantity: number;
     image: { url: string };
+    color: IColor | undefined;
+    size: string;
 }
 
 interface CartState {
     cartItems: CartItem[];
-    addToCart: (item: CartItem) => void;
+    addToCart: (item: {
+        image: { url: `${string}${string}` | `${string}undefined` };
+        quantity: number;
+        color: IColor | undefined;
+        size: string;
+        price: number;
+        name: string;
+        id: string
+    }) => void;
     removeFromCart: (itemId: string) => void;
     updateQuantity: (itemId: string, quantity: number) => void;
     clearCart: () => void;
