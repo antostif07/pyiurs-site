@@ -1,8 +1,8 @@
 import '../globals.css'; // Make sure this path is correct
 import { ReactNode } from 'react';
-import Footer from '@/components/footer';
 import Header from "@/components/header";
 import {Metadata, Viewport} from "next/types";
+import Footer from '../../components/footer';
 
 export const viewport: Viewport = {
     width: 'device-width',
