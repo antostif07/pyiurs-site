@@ -9,13 +9,10 @@ import {
     ShoppingBag,
     ArrowRight,
     CreditCard,
-    ShieldCheck,
     Truck
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 // import {toast} from "sonner";
 import useCartStore from "@/store/cart";
 import LivraisonForm from "@/components/livraison-form";
