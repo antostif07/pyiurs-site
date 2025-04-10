@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import {Segment} from "@/types/types";
 import PyiursLogo from "@/app/(main)/components/ui/PyiursLogo";
+import useCartStore from "@/store/cart";
 
 interface HeaderClientProps {
   mainCategories: Segment[];
@@ -27,7 +28,9 @@ const HeaderClient = ({ mainCategories }: HeaderClientProps) => {
   const [mobileSubSubCategory, setMobileSubSubCategory] = useState<number | null>(null); // New state for the sub-subcategory
   const currentRoute = usePathname();
 
-  // Fonction pour gérer le retour en arrière dans le menu mobile
+  const cart = useCartStore()
+
+  // Function to handle the back navigation in the mobile menu
   const handleMobileBack = () => {
     if (mobileSubSubCategory !== null) {
       setMobileSubSubCategory(null);
@@ -147,6 +150,11 @@ const HeaderClient = ({ mainCategories }: HeaderClientProps) => {
               <Link href="/cart">
                 <Button variant="ghost" size="icon" className="relative">
                   <ShoppingBag className="h-5 w-5" />
+                  {cart.cartItems.length > 0 && (
+                      <span className="absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2 bg-red-500 text-white rounded-full text-xs px-1.5 py-0.5">
+                        {cart.cartItems.length}
+                      </span>
+                  )}
                 </Button>
               </Link>
               <Button variant="ghost" size="icon" className="md:hidden" onClick={toggleMobileMenu}>

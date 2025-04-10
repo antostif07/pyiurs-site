@@ -18,6 +18,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 // import {toast} from "sonner";
 import useCartStore from "@/store/cart";
+import LivraisonForm from "@/components/livraison-form";
 
 export default function CartPage() {
     const { ref, inView } = useInView({
@@ -131,12 +132,12 @@ export default function CartPage() {
                                                     </div>
                                                     <div className="text-right">
                                                         <div className="flex items-center">
-                                                            <span className="font-medium">{(item.price * item.quantity).toFixed(2)} €</span>
-                                                            {item.price && (
-                                                                <span className="ml-2 text-muted-foreground line-through text-sm">
-                                  {(item.price * item.quantity).toFixed(2)} €
-                                </span>
-                                                            )}
+                                                            <span className="font-medium">{(item.price * item.quantity).toFixed(2)} $</span>
+                                                            {/*{item.price && (*/}
+                                                            {/*    <span className="ml-2 text-muted-foreground line-through text-sm">*/}
+                                                            {/*  {(item.price * item.quantity).toFixed(2)} €*/}
+                                                            {/*</span>*/}
+                                                            {/*)}*/}
                                                         </div>
                                                         <Button
                                                             variant="ghost"
@@ -157,31 +158,7 @@ export default function CartPage() {
                             </div>
                         </div>
 
-                        <div className="mt-8 bg-background rounded-lg border p-6">
-                            <h2 className="text-xl font-semibold mb-4">Livraison</h2>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <Label htmlFor="country">Pays</Label>
-                                    <select
-                                        id="country"
-                                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 mt-1.5"
-                                    >
-                                        <option value="FR">France</option>
-                                        <option value="BE">Belgique</option>
-                                        <option value="CH">Suisse</option>
-                                        <option value="LU">Luxembourg</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <Label htmlFor="postal-code">Code postal</Label>
-                                    <Input id="postal-code" className="mt-1.5" placeholder="75001" />
-                                </div>
-                            </div>
-                            <div className="mt-4 flex items-center text-sm text-muted-foreground">
-                                <Truck className="h-4 w-4 mr-2" />
-                                <span>{`Livraison gratuite à partir de 100€ d'achat`}</span>
-                            </div>
-                        </div>
+                        <LivraisonForm />
                     </div>
 
                     {/* Order Summary */}
@@ -251,10 +228,10 @@ export default function CartPage() {
                             </div> */}
 
                             <div className="space-y-3 text-sm text-muted-foreground">
-                                <div className="flex items-center">
-                                    <ShieldCheck className="h-4 w-4 mr-2 text-primary" />
-                                    <span>Paiement 100% sécurisé</span>
-                                </div>
+                                {/*<div className="flex items-center">*/}
+                                {/*    <ShieldCheck className="h-4 w-4 mr-2 text-primary" />*/}
+                                {/*    <span>Paiement 100% sécurisé</span>*/}
+                                {/*</div>*/}
                                 <div className="flex items-center">
                                     <Truck className="h-4 w-4 mr-2 text-primary" />
                                     <span>Livraison rapide et suivie</span>
