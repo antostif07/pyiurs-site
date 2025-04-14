@@ -31,7 +31,8 @@ export async function getProductInfoWithGemini(
     // Vérifiez le modèle exact que vous souhaitez utiliser (pro-vision, 1.5-flash, etc.)
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
-    let prompt = "Décris cet habit détaillé pour e-commerce. Donne nom court (prénom français, anglais, espagnol ou italien inspiré de preference femini, pas des couleur) & description (max 3 phrases, style).";
+    let prompt = "Décris cet habit détaillé pour e-commerce. Donne nom court (prénom français, anglais, espagnol ou italien inspiré de preference femini, pas des couleur) & description (max 3 phrases, style)." +
+        "La description doit obligatoirement fait en francais";
     if (excludedNames.length > 0) {
         const namesToAvoid = excludedNames.join('", "');
         prompt += `\n\nIMPORTANT: Évite les noms suivants (déjà utilisés/rejetés pour CE produit): "${namesToAvoid}". Propose un nom différent.`;

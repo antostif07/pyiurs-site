@@ -262,6 +262,7 @@ interface NewProductData {
     slug: string;
     price: number;
     reference: string;
+    status?: string;
     segment?: {
         connect: string[]
     };

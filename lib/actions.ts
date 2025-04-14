@@ -71,6 +71,12 @@ export async function importProducts(formData: FormData): Promise<ActionResult> 
                 const existingProducts = await getProducts({ reference: productReference });
                 existingProductId = existingProducts[0]?.documentId;
 
+                if (existingProductId) {
+                    console.log(`Ligne ${rowNum}: Produit ${productReference} exists`);
+                    updateCount++;
+                    continue;
+                }
+
                 // 2. Obtenir l'image
                 const imageUrl = row[imageUrlColumn]?.toString().trim();
                 if (!imageUrl) {
