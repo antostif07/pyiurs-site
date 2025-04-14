@@ -1,4 +1,15 @@
-import {Category, HomeSection, IArticle, ICollection, Product, Segment, SubCategory} from "@/types/types"
+import {
+    Category,
+    HomeSection,
+    IArticle,
+    ICollection,
+    IColor,
+    IMark,
+    ISize,
+    Product,
+    Segment,
+    SubCategory
+} from "@/types/types"
 
 const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_API_URL;
 
@@ -25,21 +36,49 @@ export async function getHeroSection(): Promise<HomeSection[]> {
     }
 }
 
-export async function getSegments(): Promise<Segment[]> {
-    const res = await fetch(
-        `${process.env.NEXT_PUBLIC_STRAPI_API_URL}/api/segments?populate=categories&populate=categories.sub_categories&populate=image`,
-        {
-            next: {
-                revalidate: 60,
-            }
-        }
-    );
+export async function getSegments({name, slug}: {name?: string, slug?: string} = {}): Promise<Segment[]> {
+    const params = new URLSearchParams()
+    // params
+    params.append('populate', 'categories');
+    params.append('populate', 'categories.sub_categories');
+    params.append('populate', 'image');
 
-    if (!res.ok) {
-        throw new Error(`Failed to fetch segments: ${res.status}`);
+    // filters
+    // Ajout conditionnel des filtres (URLSearchParams gère l'encodage)
+    if (name) {
+        params.append('filters[name][$eqi]', name);
+    }
+    if (slug) {
+        params.append('filters[slug][$eq]', slug);
     }
 
-    const data = await res.json();
+    // final url
+    const queryString = params.toString();
+    const apiUrl = `${STRAPI_URL}/api/segments${queryString ? `?${queryString}` : ''}`;
+
+    let res: Response;
+    try {
+        res = await fetch(apiUrl, { next: {revalidate: 60} });
+    } catch (error) {
+        console.error("Network error fetching segments:", error);
+        throw new Error(`Network error fetching segments: ${error instanceof Error ? error.message : error}`);
+    }
+
+    if (!res.ok) {
+        let errorBody = '';
+        try {
+            errorBody = await res.text();
+        } catch {  }
+        throw new Error(`Failed to fetch segments: ${res.status} ${res.statusText}. ${errorBody}`);
+    }
+
+    let data;
+    try {
+        data = await res.json();
+    } catch (error) {
+        console.error("Error parsing JSON response for segments:", error);
+        throw new Error(`Error parsing JSON response for segments.`);
+    }
 
     if (data && data.data) {
         return data.data.map((item: Segment) => {
@@ -54,6 +93,29 @@ export async function getSegments(): Promise<Segment[]> {
         });
     } else {
         console.error("Invalid segments data structure:", data);
+        return [];
+    }
+}
+
+export async function getCategories({segment, slug, name}: {segment?: string, slug?: string, name?: string}): Promise<Category[]> {
+    const apiUrl = `${STRAPI_URL}/api/categories?populate=*`;
+    const segmentFilter = segment ? `&filters[segments][slug][$eq]=${segment}` : '';
+    const slugFilter = slug ? `&filters[slug][$eq]=${slug}` : '';
+    const nameFilter = slug ? `&filters[name][$eq]=${name}` : '';
+    const filter = `${segmentFilter}${slugFilter}${nameFilter}`;
+
+    const res = await getResult(apiUrl, filter)
+
+    if (!res.ok) {
+        throw new Error(`Failed to fetch categories: ${res.status}`);
+    }
+
+    const data = await res.json();
+
+    if (data) {
+        return data.data;
+    } else {
+        console.error("Invalid categories data structure:", data);
         return [];
     }
 }
@@ -75,15 +137,16 @@ export async function getCollections(): Promise<ICollection[]> {
     }
 }
 
-export async function getProducts({segment, slug, limit, subCategory, reference} : {segment?: string, slug?: string, limit?: number, subCategory?: string, reference?: string}): Promise<Product[]> {
+export async function getProducts({segment, slug, limit, subCategory, reference, name} : {name?: string, segment?: string, slug?: string, limit?: number, subCategory?: string, reference?: string}): Promise<Product[]> {
     const apiUrl = `${STRAPI_URL}/api/products?populate=sub_category&populate=image&populate=segment&populate=category&populate=variants.image&populate=variants.sizes&populate=variants.color&sort=id:desc`;
     const segmentFilter = segment ? `&filters[segment][slug][$eq]=${segment}` : '';
     const slugFilter = slug ? `&filters[slug][$eq]=${slug}` : '';
     const subCategorySlug = subCategory ? `&filters[sub_category][slug][$eq]=${subCategory}` : '';
     const limitFilter = limit ? `&pagination[limit]=${limit}` : '';
     const referenceFilter = reference ? `&filters[reference][$eq]=${reference}` : '';
+    const nameFilter = name ? `&filters[name][$eqi]=${name}` : '';
 
-    const filter = `${segmentFilter}${slugFilter}${limitFilter}${subCategorySlug}${referenceFilter}`;
+    const filter = `${nameFilter}${segmentFilter}${slugFilter}${limitFilter}${subCategorySlug}${referenceFilter}`;
 
     const url = `${apiUrl}${filter}`;
 
@@ -122,26 +185,8 @@ export async function getSegment(slug: string): Promise<Segment|null> {
     }
 }
 
-export async function getCategories({segment, slug}: {segment?: string, slug?: string}): Promise<Category[]> {
-    const apiUrl = `${STRAPI_URL}/api/categories?populate=*`;
-    const segmentFilter = segment ? `&filters[segments][slug][$eq]=${segment}` : '';
-    const slugFilter = slug ? `&filters[slug][$eq]=${slug}` : '';
-    const filter = `${segmentFilter}${slugFilter}`;
-
-    const res = await fetch(`${apiUrl}${filter}`, { next: { revalidate: 60 } });
-
-    if (!res.ok) {
-        throw new Error(`Failed to fetch categories: ${res.status}`);
-    }
-
-    const data = await res.json();
-
-    if (data) {
-        return data.data;
-    } else {
-        console.error("Invalid categories data structure:", data);
-        return [];
-    }
+const getResult = async (apiUrl: string, filter: string) => {
+    return await fetch(`${apiUrl}${filter}`, {next: {revalidate: 60}})
 }
 
 export async function getArticles({slug}: {slug?: string}): Promise<IArticle[]> {
@@ -165,19 +210,82 @@ export async function getArticles({slug}: {slug?: string}): Promise<IArticle[]> 
     }
 }
 
-export async function getSubCategories({segment, category, slug}: {segment?: string, category?: string, slug?: string}): Promise<SubCategory[]> {
+export async function getSubCategories({segment, category, slug, name}: {segment?: string, category?: string, slug?: string, name?: string}): Promise<SubCategory[]> {
     const apiUrl = `${STRAPI_URL}/api/sub-categories?populate=category`;
-
     const filterSegment = segment ? `&filters[segments][slug][$eq]=${segment}` : '';
-
     const filterCategory = category ? `&filters[category][slug][$eq]=${category}` : '';
-
     const slugFilter = slug ? `&filters[slug][$eq]=${slug}` : '';
+    const nameFilter = name ? `&filters[name][$eqi]=${name}` : '';
+    const filter = `${filterSegment}${filterCategory}${slugFilter}${nameFilter}`;
 
-    const res = await fetch(`${apiUrl}${filterSegment}${filterCategory}${slugFilter}`, { next: { revalidate: 60 } });
+    const res = await getResult(apiUrl, filter);
 
     if (!res.ok) {
         throw new Error(`Failed to fetch sub-categories: ${res.status}`);
+    }
+
+    const data = await res.json();
+
+    if (data) {
+        return data.data;
+    } else {
+        console.error("Invalid sub-categories data structure:", data);
+        return [];
+    }
+}
+
+export async function getMarks({slug, name}: {slug?: string, name?: string}): Promise<IMark[]> {
+    const apiUrl = `${STRAPI_URL}/api/marks?populate=*`;
+    const slugFilter = slug ? `&filters[slug][$eq]=${slug}` : '';
+    const nameFilter = name ? `&filters[name][$eqi]=${name}` : '';
+    const filter = `${slugFilter}${nameFilter}`;
+
+    const res = await getResult(apiUrl, filter);
+
+    if (!res.ok) {
+        throw new Error(`Failed to fetch marks: ${res.status}`);
+    }
+
+    const data = await res.json();
+
+    if (data) {
+        return data.data;
+    } else {
+        console.error("Invalid sub-categories data structure:", data);
+        return [];
+    }
+}
+
+export async function getColors({name}: {name?: string}): Promise<IColor[]> {
+    const apiUrl = `${STRAPI_URL}/api/colors?populate=*`;
+    const nameFilter = name ? `&filters[name][$eqi]=${name}` : '';
+    const filter = `${nameFilter}`;
+
+    const res = await getResult(apiUrl, filter);
+
+    if (!res.ok) {
+        throw new Error(`Failed to fetch marks: ${res.status}`);
+    }
+
+    const data = await res.json();
+
+    if (data) {
+        return data.data;
+    } else {
+        console.error("Invalid sub-categories data structure:", data);
+        return [];
+    }
+}
+
+export async function getSizes({name}: {name?: string}): Promise<ISize[]> {
+    const apiUrl = `${STRAPI_URL}/api/sizes?populate=*`;
+    const nameFilters = name ? `&filters[name][$eqi]=${name}` : '';
+    const filter = `${nameFilters}`;
+
+    const res = await getResult(apiUrl, filter);
+
+    if (!res.ok) {
+        throw new Error(`Failed to fetch sizes: ${res.status}`);
     }
 
     const data = await res.json();

@@ -16,25 +16,70 @@ export default function ProductCard({product}: {product: Product}) {
     const [selectedVariantImages, setSelectedVariantImages] = useState<{ [productId: number]: string }>({});
 
     const handleColorClick = (productId: number, variant: ProductVariant) => {
-        if (variant.image && variant.image.length > 0) {
+        const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL || '';
+        const variantImageObject = variant.image?.[0]; // Accès sécurisé
+        const variantImagePath = variantImageObject?.formats?.medium?.url || variantImageObject?.url || null;
+
+        if (variantImagePath) {
+            const fullUrl = `${strapiUrl}${variantImagePath}`;
             setSelectedVariantImages((prev) => ({
                 ...prev,
-                [productId]: `${process.env.NEXT_PUBLIC_STRAPI_API_URL}${variant.image[0]?.formats?.medium?.url ?? '/fallback-image-url.jpg'}`,
+                [productId]: fullUrl, // Stocke l'URL complète
             }));
         } else {
-            setSelectedVariantImages((prev) => ({
-                ...prev,
-                [productId]: '',
-            }));
+            // Si ce variant spécifique n'a pas d'image, on supprime la sélection
+            // pour laisser getProductImage choisir le fallback (1er variant ou image principale)
+            setSelectedVariantImages((prev) => {
+                const newState = { ...prev };
+                delete newState[productId]; // Supprime la clé pour ce produit
+                return newState;
+            });
         }
     };
 
-    const getProductImage = (product: Product) => {
-        if (product.variants.length < 1) {
-            return '/fallback.jpg'
+    const getProductImage = (product: Product): string | null => {
+        // Récupérer l'URL base de Strapi (avec un fallback vide si non défini)
+        const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL || '';
+
+        // Fonction helper pour obtenir l'URL d'une image Strapi (préfère 'medium')
+        const getImageUrlPath = (imageObject: any): string | null => {
+            // Vérifie si l'objet image et l'URL existent
+            if (!imageObject) return null;
+            // Préfère le format 'medium', sinon l'URL de base
+            return imageObject.formats?.medium?.url || imageObject.url || null;
+        };
+
+        // 1. Vérifier l'image du variant sélectionné
+        const selectedVariantUrl = selectedVariantImages[product.id];
+        // S'assurer que l'URL sélectionnée n'est pas juste une chaîne vide ou null/undefined
+        if (selectedVariantUrl) {
+            // On suppose que handleColorClick stocke déjà l'URL complète
+            return selectedVariantUrl;
         }
-        return selectedVariantImages[product.id] || `${process.env.NEXT_PUBLIC_STRAPI_API_URL}${product.variants[0]?.image?.[0]?.url}`;
+
+        // 2. Vérifier l'image du premier variant (s'il y a des variants)
+        if (product.variants && product.variants.length > 0) {
+            const firstVariantImage = product.variants[0]?.image?.[0]; // Accès sécurisé
+            const firstVariantPath = getImageUrlPath(firstVariantImage);
+            if (firstVariantPath) {
+                return `${strapiUrl}${firstVariantPath}`;
+            }
+            // Si le premier variant n'a pas d'image, on passe à l'image principale (ci-dessous)
+        }
+
+        // 3. Vérifier l'image principale du produit
+        // (S'applique si pas de variants, ou si le 1er variant n'a pas d'image)
+        const mainProductImage = product.image; // L'image principale du produit
+        const mainImagePath = getImageUrlPath(mainProductImage);
+        if (mainImagePath) {
+            return `${strapiUrl}${mainImagePath}`;
+        }
+
+        // 4. Si aucune image valide n'a été trouvée
+        return null; // Retourne null pour indiquer "rien"
     };
+
+    const imageUrl = getProductImage(product)
 
     const [, setHoveredProduct] = useState<number | null>(null);
     const addToCart = useCallback(() => {
@@ -69,12 +114,26 @@ export default function ProductCard({product}: {product: Product}) {
             >
                 <Link href={`/products/${product.segment?.slug}/${product.category?.slug}/${product.sub_category?.slug}/${product.slug}`} passHref>
                     <div className="relative aspect-[3/4] overflow-hidden cursor-pointer">
-                        <Image
-                            src={getProductImage(product)}
-                            alt={product.name}
-                            fill
-                            className="object-cover transition-transform duration-500 hover:scale-105"
-                        />
+                        {imageUrl ? ( // Condition pour afficher l'image seulement si imageUrl n'est pas null
+                            <Image
+                                src={imageUrl}
+                                alt={product.name}
+                                fill
+                                className="object-cover transition-transform duration-500 hover:scale-105"
+                                // Optionnel mais recommandé : gestion d'erreur si l'URL est invalide
+                                onError={(e) => {
+                                    console.warn(`Failed to load image: ${imageUrl}`);
+                                    // Option: remplacer par un placeholder directement
+                                    (e.target as HTMLImageElement).src = '/images/placeholder.png'; // Assurez-vous que ce chemin existe
+                                    (e.target as HTMLImageElement).srcset = '';
+                                }}
+                            />
+                        ) : (
+                            // Optionnel : Afficher un placeholder si AUCUNE image n'est disponible
+                            <div className="absolute inset-0 flex items-center justify-center text-xs text-gray-400">
+                                Image non disponible
+                            </div>
+                        )}
                         <div className="absolute top-2 left-2 flex flex-col gap-2">
                             <Badge className="bg-primary text-primary-foreground">Nouveau</Badge>
                         </div>

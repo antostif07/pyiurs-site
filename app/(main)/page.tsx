@@ -24,7 +24,7 @@ export default function HomePage() {
       <FeaturedProducts
           segment={'pyiurs-beauty'}
           title={"Nos Cosmetiques Populaires"}
-          subtitle={'Découvrez notre sélection de produits les plus appréciés par nos clientes. Des pièces élégantes et confortables pour toutes les occasions.'}
+          subtitle={'Découvrez notre sélection de produits beauty les plus appréciés par nos clientes. '}
       />
     </div>
     {/*<HomeCollection />*/}

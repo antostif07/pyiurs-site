@@ -190,12 +190,21 @@ interface IButton {
 }
 
 interface IColor {
+    documentId: string;
     id: number;
     name: string;
     hex: string;
 }
 
+// Type pour les infos retournées par le helper d'unicité
+interface UniqueProductInfo {
+    name: string;
+    description: string;
+    slug: string; // Le slug unique validé
+}
+
 interface ISize {
+    documentId: string;
     id: number;
     name: string;
     shorten: string;
@@ -224,4 +233,64 @@ interface IArticle {
     excerpt: string;
 }
 
-export type { IArticle, ISize, IColor, ICollection, SubCategory, ImageFormats, Image, Product, Pagination, ApiResponse, ProductVariant, Segment, Category, CartState, CartItem, HomeSection, IButton };
+interface IMark {
+    id: number;
+    documentId: string;
+    createdAt: string;
+    category: Segment;
+    name: string;
+    slug: string;
+}
+
+interface ExcelData {
+    "Reference": string;
+    "Price": number;
+    "Image"?: string; // Rendre optionnel au cas où la colonne n'existe pas
+    "Colors"?: string;
+    "Sizes"?: string;
+    "Mark"?: string;
+    "SubCategory": string;
+    "Segment": string;
+    "Category"?: string;
+    [key: string]: any; // Pour permettre l'accès via imageUrlColumn
+}
+
+
+interface NewProductData {
+    name: string;
+    description: string;
+    slug: string;
+    price: number;
+    reference: string;
+    segment?: {
+        connect: string[]
+    };
+    category?: {
+        connect: string[]
+    };
+    sub_category?: {
+        connect: string[]
+    };
+    mark?: {
+        connect: string[]
+    };
+    variants: VariantData[];
+    image?: number; // Ajouté pour l'ID de l'image uploadée
+}
+
+interface ActionResult {
+    message: string;
+    type: 'success' | 'error';
+    details?: string[]; // Pour remonter les erreurs spécifiques
+}
+
+interface VariantData {
+    color: {
+        connect: string[]
+    };
+    sizes: {
+        connect: string[]
+    };
+}
+
+export type { UniqueProductInfo, VariantData, ActionResult, NewProductData, ExcelData, IMark, IArticle, ISize, IColor, ICollection, SubCategory, ImageFormats, Image, Product, Pagination, ApiResponse, ProductVariant, Segment, Category, CartState, CartItem, HomeSection, IButton };

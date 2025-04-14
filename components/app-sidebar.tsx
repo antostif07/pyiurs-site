@@ -2,7 +2,6 @@
 
 import * as React from "react"
 import {
-    ArrowUpCircleIcon,
     BarChartIcon,
     CameraIcon,
     ClipboardListIcon,
@@ -32,6 +31,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import PyiursLogo from "@/app/(main)/components/ui/PyiursLogo";
 
 const data = {
     user: {
@@ -160,10 +160,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                             asChild
                             className="data-[slot=sidebar-menu-button]:!p-1.5"
                         >
-                            <a href="#">
-                                <ArrowUpCircleIcon className="h-5 w-5" />
-                                <span className="text-base font-semibold">Acme Inc.</span>
-                            </a>
+                            <PyiursLogo />
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                 </SidebarMenu>

@@ -2,183 +2,218 @@
 
 import { revalidatePath } from 'next/cache';
 import * as xlsx from 'xlsx';
-import { GoogleGenerativeAI } from '@google/generative-ai';
-import { writeFile, unlink, mkdir, readFile } from 'fs/promises'; // Import de readFile
+import { writeFile, unlink, mkdir, readFile } from 'fs/promises';
 import { join } from 'path';
 import { unstable_noStore as noStore } from 'next/cache';
-import {getProducts} from "@/lib/api";
+import {getCategories, getColors, getMarks, getProducts, getSegments, getSizes, getSubCategories,} from "@/lib/api";
 import slugify from "slugify";
+import {
+    getImageData, getOrCreateEntityId, getUniqueProductInfoAndSlug, uploadImageToStrapi
+} from "@/lib/helpers";
+import {ActionResult, ExcelData, NewProductData, VariantData} from "@/types/types";
 
-// Définition des types
-interface ActionResult {
-    message: string;
-    type: 'success' | 'error';
-}
-async function getImageBuffer(imageUrl: string): Promise<{ buffer: string, mimeType: string }> {
-    const response = await fetch(imageUrl);
-
-    if (!response.ok) {
-        throw new Error(`Erreur lors du téléchargement de l'image: ${response.status} ${response.statusText}`);
-    }
-
-    const mimeType = response.headers.get('content-type') || '';
-    const arrayBuffer = await response.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer).toString('base64'); // Convertit en base64
-
-    return { buffer, mimeType };
-}
 
 export async function importProducts(formData: FormData): Promise<ActionResult> {
     noStore();
-
     const excelFile = formData.get('excelFile') as File;
     const imageUrlColumn = formData.get('imageUrlColumn') as string;
 
-    if (!excelFile || !imageUrlColumn) {
-        return { message: 'Veuillez sélectionner un fichier Excel et une colonne d\'URL.', type: 'error' };
-    }
+    // --- Vérifications Initiales ---
+    if (!excelFile || !imageUrlColumn) return { message: 'Veuillez sélectionner un fichier Excel et spécifier la colonne des URLs d\'images.', type: 'error' };
+    if (!process.env.STRAPI_API_URL) return { message: 'URL API Strapi non configurée.', type: 'error' };
+    if (!process.env.GOOGLE_API_KEY) return { message: 'Clé API Google non configurée.', type: 'error' };
+
+    const tempDir = join(process.cwd(), '.tmp');
+    const tempFilePath = join(tempDir, `${Date.now()}-${excelFile.name}`);
+    const errorDetails: string[] = [];
+    let successCount = 0; // Créations
+    let updateCount = 0;  // Mises à jour
+    let skippedCount = 0; // Réf manquante
+    let errorCount = 0;   // Erreurs ligne
+
+    // Sets pour suivre les noms/slugs utilisés DANS CE BATCH d'import
+    const usedProductNamesInBatch = new Set<string>();
 
     try {
-        // 1. Enregistrer le fichier temporairement sur le serveur
+        // --- Préparation Fichier & Lecture Excel ---
+        await mkdir(tempDir, { recursive: true });
         const buffer = await excelFile.arrayBuffer();
-        const tempDir = join(process.cwd(), '.tmp');
-
-        // Créer le dossier temporaire s'il n'existe pas
-        try {
-            await mkdir(tempDir, { recursive: true }); // recursive: true crée les dossiers parents si nécessaire
-        } catch (mkdirError: any) {
-            console.error("Erreur lors de la création du dossier temporaire:", mkdirError);
-            return { message: 'Erreur lors de la création du dossier temporaire.', type: 'error' };
-        }
-
-        const tempFilePath = join(tempDir, excelFile.name);
-
-        try {
-            await writeFile(tempFilePath, Buffer.from(buffer));
-        } catch (writeError: any) {
-            console.error("Erreur lors de l'écriture du fichier temporaire:", writeError);
-            return { message: 'Erreur lors de l\'écriture du fichier temporaire.', type: 'error' };
-        }
-
-        // 2. Lire le fichier Excel
-        let workbook: xlsx.WorkBook;
-        try {
-            // Lire le fichier de manière asynchrone
-            const fileContent = await readFile(tempFilePath);
-            workbook = xlsx.read(fileContent, { type: 'buffer' });
-        } catch (readError: any) {
-            console.error("Erreur lors de la lecture du fichier Excel:", readError);
-            return { message: 'Erreur lors de la lecture du fichier Excel.', type: 'error' };
-        }
+        await writeFile(tempFilePath, Buffer.from(buffer));
+        const fileContent = await readFile(tempFilePath);
+        const workbook = xlsx.read(fileContent, { type: 'buffer' });
         const sheetName = workbook.SheetNames[0];
         const sheet = workbook.Sheets[sheetName];
-        const data = xlsx.utils.sheet_to_json(sheet);
+        const data: ExcelData[] = xlsx.utils.sheet_to_json(sheet);
 
-        // 3. Configuration de Gemini Pro Vision
-        const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY || "");  // Assurez-vous d'avoir la clé dans .env.local
-        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" }); // Initialisation correcte du modèle
+        console.log(`Début de l'import/màj de ${data.length} lignes...`);
 
-        // 4. Traitement des données
-        for (const row of data) {
-            // check if product exists
-            // @ts-expect-error:  Le type de row[reference] peut être undefined
-            const productExists = await getProducts({reference: row['Reference']})
+        // --- Traitement des Lignes ---
+        for (const [index, row] of data.entries()) {
+            const rowNum = index + 2;
+            const productReference = row['Reference']?.toString().trim();
+            const productSubCategory = row['SubCategory']?.toString().trim();
 
-            if(productExists.length > 0) {
+            // --- Vérification Référence (inchangée) ---
+            if (!productReference) {
+                console.warn(`Ligne ${rowNum}: Référence produit manquante. Ligne ignorée.`);
+                errorDetails.push(`Ligne ${rowNum}: Référence manquante.`);
+                skippedCount++;
                 continue;
             }
 
-            // @ts-expect-error:  Le type de row[imageUrlColumn] peut être undefined
-            const imageUrl = row[imageUrlColumn] as string;
-            if (imageUrl) {
-                try {
-                    // Télécharger l'image (avec fetch)
-                    const { buffer: imageBuffer, mimeType } = await getImageBuffer(imageUrl);
+            console.log(`--- Traitement Ligne ${rowNum} (Ref: ${productReference}) ---`);
 
-                    const prompt: string = "Décris cet habit de façon détaillée pour une fiche produit de e-commerce.  Donne un nom court et une description longue. Sois créatif et mets en avant ses atouts et son style." +
-                        "Réponds au format JSON suivant :\n" +
-                        "{\n" +
-                        "  \"name\": \"Nom court de l'habit\",\n" +
-                        "  \"description\": \"Description longue de l'habit\"\n" +
-                        "}"
+            // --- Isolation Erreur par Ligne ---
+            let existingProductId: string | undefined = undefined; // Pour stocker l'ID si màj
 
-                    // Préparation du contenu pour Gemini
-                    const parts = [
-                        { inlineData: { data: imageBuffer, mimeType: mimeType } }
-                    ];
+            try {
+                // 1. Vérifier si le produit existe déjà
+                const existingProducts = await getProducts({ reference: productReference });
+                existingProductId = existingProducts[0]?.documentId;
 
-                    // Générer la description avec Gemini
-                    const geminiResponse = await model.generateContent([prompt, ...parts]);
-                    const text = geminiResponse.response.text();
+                // 2. Obtenir l'image
+                const imageUrl = row[imageUrlColumn]?.toString().trim();
+                if (!imageUrl) {
+                    throw new Error(`Ligne ${rowNum}: URL d'image manquante dans la colonne ${imageUrlColumn}`);
+                }
+                const imageData = await getImageData(imageUrl); // Peut throw
 
-                    const cleanedText = text.replace(/^```json\s*/, '').replace(/```$/, '');
-                    // Essayer de parser la réponse JSON
-                    const jsonData = JSON.parse(cleanedText);
+                // 3. Obtenir Nom/Description/Slug UNIQUES via Gemini et vérifications
+                const uniqueProductInfo = await getUniqueProductInfoAndSlug(
+                    imageData,
+                    productReference,
+                    productSubCategory,
+                    existingProductId, // Passer l'ID existant pour l'ignorer dans les checks
+                    usedProductNamesInBatch,
+                ); // Peut throw
 
-                    const productName = jsonData.name;
-                    const productDesc = jsonData.description;
 
-                    // Ajouter l'Image dans strapi
-                    // Préparer les données pour l'upload de l'image
-                    // const imageFormData = new FormdataType();
-                    // imageFormData.append('files', Buffer.from(imageBuffer, 'base64'), `product_${row['Reference']}.${mimeType.split('/')[1]}`);
+                // 4. Get or Create Relations
+                // Peut être optimisé avec Promise.all si beaucoup de relations et performance critique
+                const segmentId = await getOrCreateEntityId(row['Segment'], getSegments, '/api/segments', 'Segment');
+                const categoryId = await getOrCreateEntityId(row['Category'], getCategories, '/api/categories', 'Catégorie');
+                const subCategoryId = await getOrCreateEntityId(row['SubCategory'], getSubCategories, '/api/sub-categories', 'Sous-catégorie');
+                const markId = await getOrCreateEntityId(row['Mark'], getMarks, '/api/marks', 'Marque');
 
-                    // Uploader l'image dans Strapi
-                    // const uploadResponse = await fetch(`${process.env.STRAPI_API_URL}/api/upload`, {
-                    //     method: 'POST',
-                    //     headers: {},
-                    //     body: imageFormData as any,
-                    // });
+                // 5. Préparer le Payload de base
+                const productPayload: NewProductData = {
+                    name: `${row['SubCategory'] || ''} ${uniqueProductInfo.name}`.trim(),
+                    description: uniqueProductInfo.description,
+                    slug: uniqueProductInfo.slug, // Utiliser le slug validé
+                    price: parseFloat(row['Price']?.toString() || '0') || 0,
+                    reference: productReference,
+                    variants: [], // Sera peuplé ensuite
+                    ...(segmentId && { segment: { connect: [segmentId]} }),
+                    ...(categoryId && { category: { connect: [categoryId] } }),
+                    ...(subCategoryId && { sub_category: { connect: [subCategoryId] } }),
+                    ...(markId && { mark: { connect: [markId] } }),
+                };
 
-                    // if (!uploadResponse.ok) {
-                    //     console.error("Erreur lors de l'upload de l'image dans Strapi:", uploadResponse.status, uploadResponse.statusText);
-                    //     return { message: `Erreur lors de l'upload de l'image dans Strapi: ${uploadResponse.status} ${uploadResponse.statusText}`, type: 'error' };
-                    // }
-                    //
-                    // const uploadData = await uploadResponse.json();
-                    // const imageId = uploadData[0].id;
+                // 6. Traitement des Variants
+                const colorNames = (row['Colors'] || '').split(',').map((c: string) => c.trim()).filter(Boolean);
+                const sizeNames = (row['Sizes'] || '').split(',').map((s: string) => s.trim()).filter(Boolean);
 
-                    // Créer le produit dans Strapi
-                    const newProductData = {
-                        name: productName,
-                        description: productDesc, slug: slugify(productName, {lower: true}),
-                        // @ts-expect-error:  Le type de row[imageUrlColumn] peut être undefined
-                        price: row['Price'], reference: row['Reference'],
-                        // image: imageId,
-                        // Ajoutez d'autres champs ici en fonction de la structure de votre type de contenu Strapi
-                    };
+                const variantPromises = colorNames.map(async (colorName): Promise<VariantData | null> => {
+                    const colorId = await getOrCreateEntityId(colorName, getColors, '/api/colors', 'Couleur');
+                    if (!colorId) {
+                        console.warn(`Ligne ${rowNum}: Couleur "${colorName}" non traitée. Variant incomplet.`);
+                        return null;
+                    }
+                    const sizeIdPromises = sizeNames.map(sizeName =>
+                        getOrCreateEntityId(sizeName, getSizes, '/api/sizes', 'Taille', { shorten: slugify(sizeName, { lower: true }) })
+                    );
+                    const resolvedSizeIds = await Promise.all(sizeIdPromises);
+                    const validSizeIds = resolvedSizeIds.filter((id): id is string => id !== null && id !== undefined);
+                    if (validSizeIds.length !== sizeNames.length && sizeNames.length > 0) {
+                        console.warn(`Ligne ${rowNum}: Certaines tailles pour ${colorName} non traitées.`);
+                    }
+                    return { color: { connect: [colorId]}, sizes: { connect: [...validSizeIds]} };
+                });
+                const resolvedVariantsOrNulls = await Promise.all(variantPromises);
+                productPayload.variants = resolvedVariantsOrNulls.filter((v): v is VariantData => v !== null);
 
-                    const product = await fetch(`${process.env.STRAPI_API_URL}/api/products`, {
-                        method: 'POST',
+                // 7. Upload Image
+                const imageId = await uploadImageToStrapi(imageData.rawBuffer, imageData.mimeType, productReference);
+                if (imageId) {
+                    productPayload.image = imageId;
+                } else {
+                    console.warn(`Ligne ${rowNum}: Image non uploadée pour ${productReference}.`);
+                    // Si mise à jour, on ne veut pas écraser une image existante avec 'undefined'
+                    // Si on met à jour, il vaut mieux ne pas inclure la clé 'image' dans le payload PUT
+                    // si l'upload échoue, pour conserver l'ancienne image.
+                    if (existingProductId) {
+                        delete productPayload.image; // Ne pas envoyer la clé image si l'upload a échoué lors d'une MAJ
+                    }
+                }
+
+                // 8. Décider: Créer ou Mettre à Jour ?
+                if (existingProductId) {
+                    // --- MISE À JOUR ---
+                    console.log(`Ligne ${rowNum}: Mise à jour du produit ${productReference} (ID: ${existingProductId})...`);
+
+                    const updateResponse = await fetch(`${process.env.STRAPI_API_URL}/api/products/${existingProductId}`, {
+                        method: 'PUT',
                         headers: {
-                            // Authorization: `Bearer ${process.env.STRAPI_API_TOKEN}`,
                             'Content-Type': 'application/json',
+                            // 'Authorization': `Bearer ${process.env.STRAPI_API_TOKEN}` // IMPORTANT
                         },
-                        body: JSON.stringify({ data: newProductData }),
+                        body: JSON.stringify({ data: productPayload }),
                     });
 
-                    const j = await product.json()
+                    if (!updateResponse.ok) {
+                        const errorBody = await updateResponse.text();
+                        throw new Error(`Échec MàJ produit ${productReference}: ${updateResponse.status} - ${errorBody}`);
+                    }
+                    const updatedProduct = await updateResponse.json();
+                    console.log(`Ligne ${rowNum}: Produit ${productReference} màj (ID: ${updatedProduct?.data?.documentId})`);
+                    updateCount++;
 
-                    console.log(j)
-                    console.log(`Produit créé avec succès.`);
-                } catch (error: any) {
-                    console.error(`Erreur lors du traitement de l'image ${imageUrl}:`, error);
+                } else {
+                    // --- CRÉATION ---
+                    console.log(`Ligne ${rowNum}: Création du produit ${productReference}...`);
+                    // S'assurer que le slug est bien présent pour la création
+                    // (il l'est car il vient de uniqueProductInfo)
+
+                    const createResponse = await fetch(`${process.env.STRAPI_API_URL}/api/products`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            // 'Authorization': `Bearer ${process.env.STRAPI_API_TOKEN}` // IMPORTANT
+                        },
+                        body: JSON.stringify({ data: productPayload }),
+                    });
+
+                    if (!createResponse.ok) {
+                        const errorBody = await createResponse.text();
+                        throw new Error(`Échec création produit ${productReference}: ${createResponse.status} - ${errorBody}`);
+                    }
+                    const createdProduct = await createResponse.json();
+                    console.log(`Ligne ${rowNum}: Produit ${productReference} créé (ID: ${createdProduct?.data?.id})`);
+                    successCount++;
                 }
+            } catch (error: any) {
+                // --- Gestion Erreur Ligne (inchangée) ---
+                console.error(`--- ERREUR Ligne ${rowNum} (Ref: ${productReference}) --- :`, error.message);
+                errorDetails.push(`Ligne ${rowNum} (Ref: ${productReference}): ${error.message}`);
+                errorCount++;
             }
-        }
+        } // Fin de la boucle for
 
-        // 5. Supprimer le fichier temporaire
-        try {
-            await unlink(tempFilePath);
-        } catch (unlinkError: any) {
-            console.error("Erreur lors de la suppression du fichier temporaire:", unlinkError);
-        }
+        // --- Nettoyage et Résultat (Mis à jour) ---
+        console.log(`Import/MàJ terminé. Créés: ${successCount}, Mis à jour: ${updateCount}, Ignorés (ref manquante): ${skippedCount}, Erreurs: ${errorCount}`);
+        await unlink(tempFilePath);
+        revalidatePath('/admin'); // Ajustez le chemin si nécessaire
 
-        revalidatePath('/admin');
-        return { message: 'Import terminé !', type: 'success' };
+        return {
+            message: `Import/MàJ terminé. ${successCount} produits créés, ${updateCount} mis à jour, ${skippedCount} ignorés (ref manquante), ${errorCount} erreurs.`,
+            type: errorCount === 0 ? 'success' : 'error',
+            details: errorDetails,
+        };
 
     } catch (error: any) {
-        console.error("Erreur lors de l'import:", error);
-        return { message: 'Erreur lors de l\'import.', type: 'error' };
+        // --- Gestion Erreur Globale (inchangée) ---
+        console.error("Erreur générale lors de l'import:", error);
+        try { await unlink(tempFilePath); } catch { /* Ignorer */ }
+        return { message: `Erreur majeure durant l'import: ${error.message}`, type: 'error' };
     }
 }
