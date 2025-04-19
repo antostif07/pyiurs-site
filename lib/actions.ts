@@ -84,10 +84,13 @@ export async function importProducts(formData: FormData): Promise<ActionResult> 
                 }
                 const imageData = await getImageData(imageUrl); // Peut throw
 
+                const pName = row['Name'] ?? ""
                 // 3. Obtenir Nom/Description/Slug UNIQUES via Gemini et vérifications
                 const uniqueProductInfo = await getUniqueProductInfoAndSlug(
                     imageData,
                     productReference,
+                    row['Segment'],
+                    pName,
                     productSubCategory,
                     existingProductId, // Passer l'ID existant pour l'ignorer dans les checks
                     usedProductNamesInBatch,
@@ -98,7 +101,9 @@ export async function importProducts(formData: FormData): Promise<ActionResult> 
                 // Peut être optimisé avec Promise.all si beaucoup de relations et performance critique
                 const segmentId = await getOrCreateEntityId(row['Segment'], getSegments, '/api/segments', 'Segment');
                 const categoryId = await getOrCreateEntityId(row['Category'], getCategories, '/api/categories', 'Catégorie');
-                const subCategoryId = await getOrCreateEntityId(row['SubCategory'], getSubCategories, '/api/sub-categories', 'Sous-catégorie');
+                const subCategoryId = await getOrCreateEntityId(row['SubCategory'], getSubCategories, '/api/sub-categories', 'Sous-catégorie', {
+                    category: { "connect": [categoryId]}, segments: {"connect": [segmentId]}
+                });
                 const markId = await getOrCreateEntityId(row['Mark'], getMarks, '/api/marks', 'Marque');
 
                 // 5. Préparer le Payload de base
@@ -179,6 +184,18 @@ export async function importProducts(formData: FormData): Promise<ActionResult> 
                     console.log(`Ligne ${rowNum}: Création du produit ${productReference}...`);
                     // S'assurer que le slug est bien présent pour la création
                     // (il l'est car il vient de uniqueProductInfo)
+
+                    const verifyNameProduct = await getProducts({name: productPayload.name})
+                    const verifySlugProduct = await getProducts({slug: productPayload.slug})
+
+                    if(verifyNameProduct.length > 0) {
+                        successCount++;
+                        continue;
+                    }
+                    if(verifySlugProduct.length > 0) {
+                        successCount++;
+                        continue;
+                    }
 
                     const createResponse = await fetch(`${process.env.STRAPI_API_URL}/api/products`, {
                         method: 'POST',

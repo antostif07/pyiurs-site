@@ -63,10 +63,47 @@ export async function getProductInfoWithGemini(
     }
 }
 
+export async function getProductDescriptionWithGemini(
+    productName: string
+): Promise<{ name: string, description: string }> {
+
+    if (!process.env.GOOGLE_API_KEY) {
+        throw new Error("Clé API Google (GOOGLE_API_KEY) non configurée.");
+    }
+
+    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
+    // Vérifiez le modèle exact que vous souhaitez utiliser (pro-vision, 1.5-flash, etc.)
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+
+    let prompt = `Mon produit s'appelle ${productName}. genere une description de qualité (max 3 phrases, style).`
+    prompt += "renvoi seulement le json sans aucun n'autre texte ou formatage markdown ```json.\n"
+    prompt += "\n\nFormat JSON: {\"description\": \"DescriptionLongue\"}";
+
+    try {
+        // console.log("Appel Gemini avec prompt:", prompt);
+        const result = await model.generateContent([prompt,]);
+        const text = result?.response?.text?.();
+
+        if (!text) throw new Error("Réponse vide ou invalide de Gemini.");
+
+        const cleanedText = text.replace(/^```json\s*/, '').replace(/```$/, '');
+        const jsonData = JSON.parse(cleanedText.trim());
+
+        if (!jsonData.description) {
+            throw new Error("Format JSON invalide ou champs manquants (name/description) dans réponse Gemini.");
+        }
+        // console.log("Réponse Gemini reçue:", jsonData); // Décommentez pour déboguer la réponse
+        return { name: productName, description: jsonData.description };
+    } catch (error: any) {
+        console.error("Erreur appel/parsing Gemini:", error);
+        throw new Error(`Erreur Gemini: ${error.message || 'Inconnue'}`); // Renvoyer pour être attrapée plus haut
+    }
+}
+
 // --- Helper: Get or Create Entity ID ---
 export async function getOrCreateEntityId(
     name: string | undefined,
-    getFunction: (filter: { name: string }) => Promise<{ documentId: string }[]>,
+    getFunction: (filter: { name?: string, slug?: string }) => Promise<{ documentId: string }[]>,
     createApiPath: string, // ex: /api/segments
     entityDisplayName: string, // ex: "Segment"
     additionalData: Record<string, any> = {} // Pour les champs comme 'shorten' pour Size
@@ -76,12 +113,15 @@ export async function getOrCreateEntityId(
 
     try {
         const existing = await getFunction({ name: trimmedName });
+        const slug = slugify(trimmedName, { lower: true, strict: true });
+
+        const existingSlug = await getFunction({slug: slug})
 
         if (existing.length > 0) {
             return existing[0].documentId;
+        } else if(existingSlug.length > 0) {
+            return existingSlug[0].documentId;
         } else {
-            console.log(`Création ${entityDisplayName}: ${trimmedName}`);
-            const slug = slugify(trimmedName, { lower: true, strict: true });
             const newData = { name: trimmedName, slug, ...additionalData };
 
             const response = await fetch(`${process.env.STRAPI_API_URL}${createApiPath}`, {
@@ -159,94 +199,26 @@ export async function uploadImageToStrapi(
     }
 }
 
-// Cette fonction factorise la logique commune de préparation des données
-// export async function prepareProductPayload(
-//     row: ExcelData,
-//     imageUrlColumn: string,
-//     rowNum: number
-// ): Promise<{ payload: NewProductData, imageData: Awaited<ReturnType<typeof getImageData>> }> {
-//     // 1. Obtenir l'URL de l'image et les infos produit via Gemini
-//     const imageUrl = row[imageUrlColumn]?.toString().trim();
-//     if (!imageUrl) {
-//         throw new Error(`Ligne ${rowNum}: URL d'image manquante dans la colonne ${imageUrlColumn}`);
-//     }
-//
-//     const imageData = await getImageData(imageUrl); // Peut throw
-//     const productInfo = await getProductInfoWithGemini(imageData); // Peut throw
-//
-//     // 2. Get or Create Relations
-//     // Note: Promise.all peut accélérer ceci si nécessaire, mais séquentiel est plus simple à lire
-//     const segmentId = await getOrCreateEntityId(row['Segment'], getSegments, '/api/segments', 'Segment');
-//     const categoryId = await getOrCreateEntityId(row['Category'], getCategories, '/api/categories', 'Catégorie');
-//     const subCategoryId = await getOrCreateEntityId(row['SubCategory'], getSubCategories, '/api/sub-categories', 'Sous-catégorie');
-//     const markId = await getOrCreateEntityId(row['Mark'], getMarks, '/api/marks', 'Marque');
-//
-//     // 3. Préparer les données de base du produit
-//     const productName = `${row['SubCategory'] || ''} ${productInfo.name}`.trim();
-//     const productSlug = slugify(`${row['Reference']}-${productInfo.name}`, { lower: true, strict: true, trim: true });
-//
-//     const productPayload: NewProductData = {
-//         name: productName,
-//         description: productInfo.description,
-//         slug: productSlug, // Inclure pour création, optionnel pour màj (Strapi le garde souvent)
-//         price: parseFloat(row['Price']?.toString() || '0') || 0,
-//         reference: row['Reference'].toString().trim(), // Assurer que la référence est bien là
-//         variants: [], // Sera peuplé ci-dessous
-//         // Assignation conditionnelle des IDs trouvés
-//         ...(segmentId && { segment: { "connect": [segmentId]} }),
-//         ...(categoryId && { category: { "connect": [categoryId]} }),
-//         ...(subCategoryId && { sub_category: { "connect": [subCategoryId]} }),
-//         ...(markId && { mark: { "connect": [markId]} }),
-//         // Le champ 'image' sera ajouté après l'upload
-//     };
-//
-//     // 4. Traitement des Variants
-//     const colorNames = (row['Colors'] || '').split(',').map((c: string) => c.trim()).filter(Boolean);
-//     const sizeNames = (row['Sizes'] || '').split(',').map((s: string) => s.trim()).filter(Boolean);
-//
-//     const variantPromises = colorNames.map(async (colorName): Promise<VariantData | null> => {
-//         const colorId = await getOrCreateEntityId(colorName, getColors, '/api/colors', 'Couleur');
-//         if (!colorId) {
-//             console.warn(`Ligne ${rowNum}: Impossible d'obtenir/créer l'ID pour la couleur "${colorName}". Variant incomplet.`);
-//             return null;
-//         }
-//
-//         const sizeIdPromises = sizeNames.map(sizeName =>
-//             getOrCreateEntityId(sizeName, getSizes, '/api/sizes', 'Taille', { shorten: slugify(sizeName, { lower: true }) })
-//         );
-//         const resolvedSizeIds = await Promise.all(sizeIdPromises);
-//         const validSizeIds = resolvedSizeIds.filter((id): id is string => id !== null && id !== undefined);
-//
-//         if (validSizeIds.length !== sizeNames.length && sizeNames.length > 0) {
-//             console.warn(`Ligne ${rowNum}: Certaines tailles pour la couleur ${colorName} n'ont pas pu être traitées.`);
-//         }
-//
-//         return {
-//             color: {
-//                 "connect": [colorId]
-//             },
-//             sizes: {
-//                 "connect": [...validSizeIds]
-//             }
-//         };
-//     });
-//
-//     const resolvedVariantsOrNulls = await Promise.all(variantPromises);
-//     productPayload.variants = resolvedVariantsOrNulls.filter((v): v is VariantData => v !== null);
-//
-//     return { payload: productPayload, imageData };
-// }
-
-
 // --- NOUVEAU Helper: Obtenir Nom/Description/Slug Unique ---
 export async function getUniqueProductInfoAndSlug(
     imageData: Awaited<ReturnType<typeof getImageData>>,
     productReference: string,
+    productSegment: string,
+    productName: string,
     productSubCategory: string,
     currentProductId: string | undefined, // ID du produit si on met à jour (pour ignorer lors du check)
     usedNamesInBatch: Set<string>,
     maxRetries = 3
 ): Promise<UniqueProductInfo> {
+
+    if (productSegment.includes("Beauty")) {
+        console.log(`Tentative pour générer nom/slug unique pour Ref: ${productReference} et la description`);
+        const productInfo = await getProductDescriptionWithGemini(productName);
+        const potentialName = productInfo.name
+        const potentialSlug = slugify(potentialName, { lower: true, strict: true, trim: true });
+
+        return { ...productInfo, slug: potentialSlug }
+    }
 
     let attempt = 0;
     while (attempt < maxRetries) {

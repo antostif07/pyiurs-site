@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback } from 'react';
+import React, {useState, useCallback, useEffect} from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
@@ -13,6 +13,7 @@ import { toast } from 'sonner';
 import {Product, ProductVariant} from "@/types/types";
 import Image from 'next/image'
 import useCartStore from "@/store/cart";
+import {Image as ImageVariant} from '../types/types'
 
 interface ColorButtonProps {
   color: string; // The color of the button (e.g., "red", "#FF0000", "rgb(255, 0, 0)")
@@ -83,8 +84,16 @@ export default function ProductPage({product}: {product: Product}) {
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant|undefined>(product.variants[0]);
   const [isShareSheetOpen, setIsShareSheetOpen] = useState(false);
   const [selectedSize, setSelectedSize] = useState("")
-  const [selectedImage, setSelectedImage] = useState(selectedVariant?.image[0])
+  const [selectedImage, setSelectedImage] = useState<ImageVariant|undefined>(undefined)
   const cart = useCartStore()
+
+  useEffect(() => {
+    if (selectedVariant && selectedVariant?.image !== null) {
+      setSelectedImage(selectedVariant?.image[0])
+    } else {
+      setSelectedImage(product.image)
+    }
+  }, [])
 
   const { ref, inView } = useInView({
     triggerOnce: true,
@@ -199,7 +208,7 @@ export default function ProductPage({product}: {product: Product}) {
                 </div>
               </div>
               <div className="grid grid-cols-4 gap-2 sm:gap-4">
-                {selectedVariant?.image.map((img, index) => (
+                { selectedVariant?.image !== null && selectedVariant?.image.map((img, index) => (
                     <button
                         key={index}
                         onClick={() => setSelectedImage(img)}

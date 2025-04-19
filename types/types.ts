@@ -244,6 +244,8 @@ interface IMark {
 
 interface ExcelData {
     "Reference": string;
+    "Description"?: string;
+    "Name"?: string,
     "Price": number;
     "Image"?: string; // Rendre optionnel au cas où la colonne n'existe pas
     "Colors"?: string;

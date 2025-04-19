@@ -101,7 +101,7 @@ export async function getCategories({segment, slug, name}: {segment?: string, sl
     const apiUrl = `${STRAPI_URL}/api/categories?populate=*`;
     const segmentFilter = segment ? `&filters[segments][slug][$eq]=${segment}` : '';
     const slugFilter = slug ? `&filters[slug][$eq]=${slug}` : '';
-    const nameFilter = slug ? `&filters[name][$eq]=${name}` : '';
+    const nameFilter = name ? `&filters[name][$eqi]=${name}` : '';
     const filter = `${segmentFilter}${slugFilter}${nameFilter}`;
 
     const res = await getResult(apiUrl, filter)
@@ -186,7 +186,7 @@ export async function getSegment(slug: string): Promise<Segment|null> {
 }
 
 const getResult = async (apiUrl: string, filter: string) => {
-    return await fetch(`${apiUrl}${filter}`, {next: {revalidate: 60}})
+    return await fetch(`${apiUrl}&${filter}`, {next: {revalidate: 60}})
 }
 
 export async function getArticles({slug}: {slug?: string}): Promise<IArticle[]> {
@@ -212,13 +212,23 @@ export async function getArticles({slug}: {slug?: string}): Promise<IArticle[]> 
 
 export async function getSubCategories({segment, category, slug, name}: {segment?: string, category?: string, slug?: string, name?: string}): Promise<SubCategory[]> {
     const apiUrl = `${STRAPI_URL}/api/sub-categories?populate=category`;
-    const filterSegment = segment ? `&filters[segments][slug][$eq]=${segment}` : '';
-    const filterCategory = category ? `&filters[category][slug][$eq]=${category}` : '';
-    const slugFilter = slug ? `&filters[slug][$eq]=${slug}` : '';
-    const nameFilter = name ? `&filters[name][$eqi]=${name}` : '';
-    const filter = `${filterSegment}${filterCategory}${slugFilter}${nameFilter}`;
 
-    const res = await getResult(apiUrl, filter);
+    const params = new URLSearchParams();
+
+    if (segment) {
+        params.append('filters[segments][slug][$eq]', segment);
+    }
+    if (category) {
+        params.append('filters[category][slug][$eq]', category);
+    }
+    if (slug) {
+        params.append('filters[slug][$eq]', slug);
+    }
+    if (name) {
+        params.append('filters[name][$eqi]', name);
+    }
+
+    const res = await getResult(apiUrl, params.toString());
 
     if (!res.ok) {
         throw new Error(`Failed to fetch sub-categories: ${res.status}`);
