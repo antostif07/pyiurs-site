@@ -29,7 +29,7 @@ export async function getProductInfoWithGemini(
 
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
     // Vérifiez le modèle exact que vous souhaitez utiliser (pro-vision, 1.5-flash, etc.)
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro-preview-03-25" });
 
     let prompt = "Décris cet habit détaillé pour e-commerce. Donne nom court (prénom français, anglais, espagnol ou italien inspiré de preference femini, pas des couleur) & description (max 3 phrases, style)." +
         "La description doit obligatoirement fait en francais";
